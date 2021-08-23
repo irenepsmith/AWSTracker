@@ -76,7 +76,7 @@ After the PDF document is uploaded, you can select the PDF document from a drop 
 
 ![AWS Photo Analyzer](images/document1.png)
 
-Then choose the **Analyze document** button and the results are displayed in the web application. 
+Then choose the **Analyze Document** button and the results are displayed in the web application. 
 
 ![AWS Photo Analyzer](images/results.png)
 
