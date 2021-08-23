@@ -72,17 +72,13 @@ The AWS document analyzer application supports uploading PDF documents to an Ama
 
 ![AWS Photo Analyzer](images/upload.png)
 
-After the PDF document is uploaded, you can analyze a selected document and have the results displayed in the application. 
+After the PDF document is uploaded, you can select the PDF document from a drop down field. 
 
 ![AWS Photo Analyzer](images/document1.png)
 
-To generate a report, enter an email address and choose **Analyze Photos**.
+Then choose the **Analyze document** button and the results are displayed in the web application. 
 
-![AWS Photo Analyzer](images/photo2.png)
-
-You can also download a given image from the Amazon S3 bucket by using this application. Simply specify the image name and choose the **Download Photo** button. The image is downloaded to your browser, as shown in this illustration. 
-
-![AWS Photo Analyzer](images/download.png)
+![AWS Photo Analyzer](images/results.png)
 
 ## Create an IntelliJ project named SpringDocumentAnalyzer
 
