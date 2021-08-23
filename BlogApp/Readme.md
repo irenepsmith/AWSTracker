@@ -12,20 +12,20 @@ For example, the following image shows a PDF document.
 
 ![AWS Photo Analyzer](images/pdf.png)
 
-After the application analyzes this image, it creates this data:
-*	Panoramic - 99.99971
-*	Outdoors - 99.99971
-*	Nature - 99.99971
-*	Landscape - 99.99971
-*	Scenery	 - 99.99971
-*	Wilderness - 96.90007
-*	Water - 93.501465
-*	Lake - 87.28128
+After the application analyzes this document, it creates this data:
 
-In addition, this application uses Amazon Simple Email Service (Amazon SES) to send a report to a given email recipient. In this tutorial, you create a Spring Boot application named **AWS Photo Analyzer**. The Spring Boot APIs are used to build a model, different views, and a controller. For more information, see [Spring Boot - Securing Web Applications](https://www.tutorialspoint.com/spring_boot/spring_boot_securing_web_applications.htm).
+* The block type is PAGE
+* The block type is LINE
+* The block type is LINE
+* The block type is LINE
+* The block type is WORD
+* The block type is WORD
+* The block type is WORD
+
+In this tutorial, you create a Spring Boot application named **AWS Document Analyzer**. The Spring Boot APIs are used to build a model, different views, and a controller. For more information, see [Spring Boot - Securing Web Applications](https://www.tutorialspoint.com/spring_boot/spring_boot_securing_web_applications.htm).
 
 This application uses the following AWS services:
-*	Amazon Rekognition
+*	Amazon Textract
 *	Amazon S3
 *	Amazon SES
 *	AWS Elastic Beanstalk
