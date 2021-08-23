@@ -8,7 +8,7 @@ You can create an AWS application that analyzes PDF documents located in an Amaz
 - The page that the detected text appears on
 - The location of the lines and words of text on the document page
 
-For example, the following image shows a PDF document.
+For example, the following image shows a PDF document that represents a health form.
 
 ![AWS Photo Analyzer](images/pdf.png)
 
