@@ -72,7 +72,7 @@ The AWS document analyzer application supports uploading PDF documents to an Ama
 
 ![AWS Photo Analyzer](images/upload.png)
 
-After the PDF document is uploaded, you can analyze a given document and have th results displayed in the application. 
+After the PDF document is uploaded, you can analyze a selected document and have the results displayed in the application. 
 
 ![AWS Photo Analyzer](images/document1.png)
 
