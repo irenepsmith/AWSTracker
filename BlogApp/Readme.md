@@ -8,9 +8,9 @@ You can create an AWS application that analyzes PDF documents located in an Amaz
 - The page that the detected text appears on
 - The location of the lines and words of text on the document page
 
-For example, the following image shows a lake.
+For example, the following image shows a PDF document.
 
-![AWS Photo Analyzer](images/Lake1.png)
+![AWS Photo Analyzer](images/pdf.png)
 
 After the application analyzes this image, it creates this data:
 *	Panoramic - 99.99971
