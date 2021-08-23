@@ -62,9 +62,9 @@ To complete the tutorial, you need the following:
 
 Create an Amazon S3 bucket named **photos[somevalue]**. Be sure to use this bucket name in your Amazon S3 Java code. For information, see [Creating a bucket](https://docs.aws.amazon.com/AmazonS3/latest/gsg/CreatingABucket.html).
 
-## Understand the AWS Photo Analyzer application
+## Understand the AWS document analyzer application
 
-The AWS Photo Analyzer application supports uploading images to an Amazon S3 bucket. After the images are uploaded, you can view the images that are analyzed.
+The AWS document analyzer application supports uploading PDF documents to an Amazon S3 bucket. After the PDF documents are uploaded, you can analyze a given document and have th results displayed in the application. 
 
 ![AWS Photo Analyzer](images/Photo1.png)
 
