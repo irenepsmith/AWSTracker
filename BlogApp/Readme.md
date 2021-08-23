@@ -64,6 +64,10 @@ Create an Amazon S3 bucket named **photos[somevalue]**. Be sure to use this buck
 
 ## Understand the AWS document analyzer application
 
+The following illustration shows the Home page of the application. 
+
+![AWS Photo Analyzer](images/home.png)
+
 The AWS document analyzer application supports uploading PDF documents to an Amazon S3 bucket. After the PDF documents are uploaded, you can analyze a given document and have th results displayed in the application. 
 
 ![AWS Photo Analyzer](images/Photo1.png)
