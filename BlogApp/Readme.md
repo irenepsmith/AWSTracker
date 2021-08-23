@@ -70,8 +70,7 @@ The following illustration shows the Home page of the application.
 
 The AWS document analyzer application supports uploading PDF documents to an Amazon S3 bucket. 
 
-![AWS Photo Analyzer](images/health.png)
-
+![AWS Photo Analyzer](images/upload.png)
 
 After the PDF documents are uploaded, you can analyze a given document and have th results displayed in the application. 
 
