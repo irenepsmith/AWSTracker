@@ -78,7 +78,7 @@ You can also download a given image from the Amazon S3 bucket by using this appl
 
 ## Create an IntelliJ project named SpringDocumentAnalyzer
 
-The first step is to create an Android project.
+The first step is to create an Maven project.
 
 ![AWS Photo Analyzer](images/projectdoc.png)
 
@@ -91,7 +91,7 @@ The first step is to create an Android project.
 
 ## Add the POM dependencies to your project
 
-At this point, you have a new project named **SpringPhotoAnalyzer**.
+At this point, you have a new project named **SpringDocumentAnalyzer**.
 
 ![AWS Photo Analyzer](images/photo3.png)
 
