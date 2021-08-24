@@ -205,159 +205,34 @@ Create a Java package in the **main/java** folder named **com.aws.example**. The
 
 Create these Java classes:
 
-+ **AnalyzePhotos** - Uses the Amazon Rekognition API to analyze the images.
-+ **BucketItem** - Used as a model that stores Amazon S3 bucket information.   
-+ **PhotoApplication** - Used as the base class for the Spring Boot application.
-+ **PhotoController** - Used as the Spring Boot controller that handles HTTP requests.
-+ **SendMessages** - Uses the Amazon SES API to send an email message with an attachment.
++ **DocumentApplication** - Used as the base class for the Spring Boot application.
++ **DocumentController** - Used as the Spring Boot controller that handles HTTP requests..   
 + **S3Service** - Uses the Amazon S3 API to perform S3 operations.
-+ **WorkItem** - Used as a model that stores Amazon Rekognition data.
-+ **WriteExcel** – Uses the JXL API (this is not an AWS API) to dynamically generate a report.     
-
-### AnalyzePhotos class
-
-The following Java code represents the **AnalyzePhotos** class. This class uses the Amazon Rekognition API to analyze the images.
-
-    package com.example.photo;
-
-    import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
-    import software.amazon.awssdk.core.SdkBytes;
-    import software.amazon.awssdk.regions.Region;
-    import software.amazon.awssdk.services.rekognition.RekognitionClient;
-    import software.amazon.awssdk.services.rekognition.model.Image;
-    import software.amazon.awssdk.services.rekognition.model.DetectLabelsRequest;
-    import software.amazon.awssdk.services.rekognition.model.DetectLabelsResponse;
-    import software.amazon.awssdk.services.rekognition.model.Label;
-    import software.amazon.awssdk.services.rekognition.model.RekognitionException;
-    import java.util.ArrayList;
-    import java.util.List;
-    import org.springframework.stereotype.Component;
-
-    @Component
-    public class AnalyzePhotos {
-
-    public ArrayList DetectLabels(byte[] bytes, String key) {
-
-        Region region = Region.US_EAST_2;
-        RekognitionClient rekClient = RekognitionClient.builder()
-                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
-                .region(region)
-                .build();
-
-        try {
-
-            SdkBytes sourceBytes = SdkBytes.fromByteArray(bytes);
-
-            // Create an Image object for the source image
-            Image souImage = Image.builder()
-                    .bytes(sourceBytes)
-                    .build();
-
-            DetectLabelsRequest detectLabelsRequest = DetectLabelsRequest.builder()
-                    .image(souImage)
-                    .maxLabels(10)
-                    .build();
-
-            DetectLabelsResponse labelsResponse = rekClient.detectLabels(detectLabelsRequest);
-
-            // Write the results to a WorkItem instance
-            List<Label> labels = labelsResponse.labels();
-
-            System.out.println("Detected labels for the given photo");
-
-            ArrayList list = new ArrayList<WorkItem>();
-            WorkItem item ;
-            for (Label label: labels) {
-                item = new WorkItem();
-                item.setKey(key); // identifies the photo
-                item.setConfidence(label.confidence().toString());
-                item.setName(label.name());
-                list.add(item);
-            }
-            return list;
-
-        } catch (RekognitionException e) {
-            System.out.println(e.getMessage());
-            System.exit(1);
-        }
-        return null ;
-     }
-    }
-
-**Note:** In this example, an **EnvironmentVariableCredentialsProvider** is used for the credentials. This is because this application is deployed to Elastic Beanstalk where environment variables are set (shown later in this tutorial).
-
-### BucketItem class
-
-The following Java code represents the **BucketItem** class that stores S3 object data.
-
-    package com.example.photo;
-
-    public class BucketItem {
-
-    private String key;
-    private String owner;
-    private String date ;
-    private String size ;
++ **TextractService** -Uses the Amazon Textract API to perform document operations.
 
 
-    public void setSize(String size) {
-        this.size = size ;
-    }
+### DocumentApplication class
 
-    public String getSize() {
-        return this.size ;
-    }
+The following Java code represents the **DocumentApplication** class.
 
-    public void setDate(String date) {
-        this.date = date ;
-    }
-
-    public String getDate() {
-        return this.date ;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner ;
-    }
-
-    public String getOwner() {
-        return this.owner ;
-    }
-
-
-    public void setKey(String key) {
-        this.key = key ;
-    }
-
-    public String getKey() {
-        return this.key ;
-    }
-    }
-
-### PhotoApplication class
-
-The following Java code represents the **PhotoApplication** class.
-
-    package com.example.photo;
+    package com.aws.example;
 
     import org.springframework.boot.SpringApplication;
     import org.springframework.boot.autoconfigure.SpringBootApplication;
 
     @SpringBootApplication
-    public class PhotoApplication {
+    public class DocumentApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(PhotoApplication.class, args);
-      }
+        SpringApplication.run(DocumentApplication.class, args);
      }
+    }
 
-### PhotoController class
+### DocumentController class
 
-The following Java code represents the **PhotoController** class that handles HTTP requests. For example, when a new image is posted (uploaded to an S3 bucket), the **singleFileUpload** method handles the request.
+The following Java code represents the **DocumentController** class.
 
-**Note**: Be sure that you change the **bucketName** variable to your Amazon S3 bucket name. 
-
-    package com.example.photo;
+    package com.aws.example;
 
     import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.stereotype.Controller;
@@ -367,91 +242,51 @@ The following Java code represents the **PhotoController** class that handles HT
     import org.springframework.web.servlet.ModelAndView;
     import org.springframework.web.multipart.MultipartFile;
     import org.springframework.web.servlet.view.RedirectView;
-    import java.io.ByteArrayInputStream;
     import java.io.IOException;
-    import java.io.InputStream;
-    import java.util.*;
 
     @Controller
-    public class PhotoController {
+    public class DocumentController {
 
-    // Change to your Bucket Name!
-    private String bucketName = "<YOUR BUCKET>"; 
-    
-    @Autowired
-    S3Service s3Client;
+     private String bucketName = "scottdocbucket";
 
-    @Autowired
-    AnalyzePhotos photos;
+     @Autowired
+     S3Service s3Service;
 
-    @Autowired
-    WriteExcel excel ;
+     @Autowired
+     TextractService textractService;
 
-    @Autowired
-    SendMessages sendMessage;
-
-    @GetMapping("/")
-    public String root() {
+     @GetMapping("/")
+     public String root() {
         return "index";
-    }
+     }
 
     @GetMapping("/process")
     public String process() {
         return "process";
     }
 
-    @GetMapping("/photo")
-    public String photo() {
-        return "upload";
+    @RequestMapping(value = "/getdocs", method = RequestMethod.GET)
+    @ResponseBody
+    String getDoc(HttpServletRequest request, HttpServletResponse response) {
+        return s3Service.ListAllObjects(bucketName);
     }
 
-    @RequestMapping(value = "/getimages", method = RequestMethod.GET)
+
+    @RequestMapping(value = "/analyzeDoc", method = RequestMethod.POST)
     @ResponseBody
     String getImages(HttpServletRequest request, HttpServletResponse response) {
 
-    return s3Client.ListAllObjects(bucketName);
-    }
+        String name = request.getParameter("name");
 
-    // Generates a report that analyzes photos in a given bucket.
-    @RequestMapping(value = "/report", method = RequestMethod.POST)
-    @ResponseBody
-    String report(HttpServletRequest request, HttpServletResponse response) {
+        // Get the byte[] from a PDF document image in an Amazon S3 bucket.
+        byte[] obBytes = s3Service.getObjectBytes(bucketName, name);
 
-        String email = request.getParameter("email");
+        // Analyzes the PDF image.
+        String xmlResults = textractService.analyzeDoc(obBytes);
+        return xmlResults ;
+     }
 
-       // Get a list of key names in the given bucket.
-       List myKeys =  s3Client.ListBucketObjects(bucketName);
-
-       // Create a List to store the data.
-       List<List> myList = new ArrayList<List>();
-
-       // loop through each element in the List.
-       int len = myKeys.size();
-       for (int z=0 ; z < len; z++) {
-
-           String key = (String) myKeys.get(z);
-           byte[] keyData = s3Client.getObjectBytes (bucketName, key);
-
-           //Analyze the photo.
-          ArrayList item =  photos.DetectLabels(keyData, key);
-          myList.add(item);
-       }
-
-       // Now we have a list of WorkItems that have all of the analytical data describing the photos in the S3 bucket.
-       InputStream excelData = excel.exportExcel(myList);
-
-       try {
-           // Email the report.
-           sendMessage.sendReport(excelData, email);
-
-       } catch (Exception e) {
-
-           e.printStackTrace();
-       }
-        return "The photos have been analyzed and the report is sent";
-    }
-
-    // Upload a video to analyze.
+    // Upload a Document to analyze.
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @ResponseBody
     public ModelAndView singleFileUpload(@RequestParam("file") MultipartFile file) {
@@ -461,51 +296,25 @@ The following Java code represents the **PhotoController** class that handles HT
             byte[] bytes = file.getBytes();
             String name =  file.getOriginalFilename() ;
 
-            // Put the file into the bucket.
-            s3Client.putObject(bytes, bucketName, name);
+           // Put the posted PDF file into the bucket.
+           s3Service.putObject(bytes, bucketName, name);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new ModelAndView(new RedirectView("photo"));
-    }
-
-
-    // This controller method downloads the given image from the Amazon S3 bucket.
-    @RequestMapping(value = "/downloadphoto", method = RequestMethod.GET)
-    void buildDynamicReportDownload(HttpServletRequest request, HttpServletResponse response) {
-        try {
-
-            // Get the form id from the submitted form.
-            String photoKey = request.getParameter("photoKey");
-            byte[] photoBytes = s3Client.getObjectBytes(bucketName, photoKey) ;
-            InputStream is = new ByteArrayInputStream(photoBytes);
-
-            // Define the required information here.
-            response.setContentType("image/png");
-            response.setHeader("Content-disposition", "attachment; filename="+photoKey);
-            org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
-            response.flushBuffer();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        return new ModelAndView(new RedirectView("process"));
       }
-     }
-
-
-
+    }
 
 ### S3Service class
 
 The following class uses the Amazon S3 API to perform S3 operations. For example, the **getObjectBytes** method returns a byte array that represents the image. Be sure to replace the bucket name in this code example with your bucket name.
 
-    package com.example.photo;
+    package com.aws.example;
 
     import org.springframework.stereotype.Component;
     import org.w3c.dom.Document;
     import org.w3c.dom.Element;
-    import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
     import software.amazon.awssdk.core.ResponseBytes;
     import software.amazon.awssdk.core.sync.RequestBody;
     import software.amazon.awssdk.regions.Region;
@@ -520,7 +329,6 @@ The following class uses the Amazon S3 API to perform S3 operations. For example
     import javax.xml.transform.dom.DOMSource;
     import javax.xml.transform.stream.StreamResult;
     import java.io.StringWriter;
-    import java.time.Instant;
     import java.util.ArrayList;
     import java.util.List;
     import java.util.ListIterator;
@@ -532,17 +340,16 @@ The following class uses the Amazon S3 API to perform S3 operations. For example
 
     // Create the S3Client object.
     private S3Client getClient() {
-       
-        Region region = Region.US_WEST_2;
+
+        Region region = Region.US_EAST_1 ;
         S3Client s3 = S3Client.builder()
-                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                 .region(region)
                 .build();
 
         return s3;
     }
 
-    // Get the byte[] from this AWS S3 object.
+    // Get the byte[] from this Amazon S3 object.
     public byte[] getObjectBytes (String bucketName, String keyName) {
 
         s3 = getClient();
@@ -553,7 +360,7 @@ The following class uses the Amazon S3 API to perform S3 operations. For example
                     .key(keyName)
                     .bucket(bucketName)
                     .build();
-            
+
             ResponseBytes<GetObjectResponse> objectBytes = s3.getObjectAsBytes(objectRequest);
             byte[] data = objectBytes.asByteArray();
             return data;
@@ -569,11 +376,10 @@ The following class uses the Amazon S3 API to perform S3 operations. For example
     public String ListAllObjects(String bucketName) {
 
         s3 = getClient();
-        long sizeLg;
-        Instant DateIn;
-        BucketItem myItem ;
 
-        List bucketItems = new ArrayList<BucketItem>();
+
+        List bucketItems = new ArrayList<String>();
+
         try {
             ListObjectsRequest listObjects = ListObjectsRequest
                     .builder()
@@ -585,16 +391,8 @@ The following class uses the Amazon S3 API to perform S3 operations. For example
 
             for (ListIterator iterVals = objects.listIterator(); iterVals.hasNext(); ) {
                 S3Object myValue = (S3Object) iterVals.next();
-                myItem = new BucketItem();
-                myItem.setKey(myValue.key());
-                myItem.setOwner(myValue.owner().displayName());
-                sizeLg = myValue.size() / 1024 ;
-                myItem.setSize(String.valueOf(sizeLg));
-                DateIn = myValue.lastModified();
-                myItem.setDate(String.valueOf(DateIn));
-
-                // Push the items to the list
-                bucketItems.add(myItem);
+                // Push the key to  the list.
+                bucketItems.add(myValue.key());
             }
 
             return convertToString(toXml(bucketItems));
@@ -606,40 +404,8 @@ The following class uses the Amazon S3 API to perform S3 operations. For example
         return null ;
     }
 
-    // Returns the names of all images in the given bucket.
-    public List ListBucketObjects(String bucketName) {
 
-        s3 = getClient();
-        String keyName ;
-
-        List keys = new ArrayList<String>();
-
-        try {
-            ListObjectsRequest listObjects = ListObjectsRequest
-                    .builder()
-                    .bucket(bucketName)
-                    .build();
-
-            ListObjectsResponse res = s3.listObjects(listObjects);
-            List<S3Object> objects = res.contents();
-
-            for (ListIterator iterVals = objects.listIterator(); iterVals.hasNext(); ) {
-                S3Object myValue = (S3Object) iterVals.next();
-                keyName = myValue.key();
-                keys.add(keyName);
-            }
-
-            return keys;
-
-        } catch (S3Exception e) {
-            System.err.println(e.awsErrorDetails().errorMessage());
-            System.exit(1);
-        }
-        return null ;
-    }
-
-
-    // Places an image into a S3 bucket.
+    // Places a PDF object into an Amazon S3 bucket.
     public String putObject(byte[] data, String bucketName, String objectKey) {
 
         s3 = getClient();
@@ -661,7 +427,7 @@ The following class uses the Amazon S3 API to perform S3 operations. For example
     }
 
     // Convert items into XML to pass back to the view.
-    private Document toXml(List<BucketItem> itemList) {
+    private Document toXml(List<String> itemList) {
 
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -669,7 +435,7 @@ The following class uses the Amazon S3 API to perform S3 operations. For example
             Document doc = builder.newDocument();
 
             // Start building the XML.
-            Element root = doc.createElement( "Items" );
+            Element root = doc.createElement( "Docs" );
             doc.appendChild( root );
 
             // Get the elements from the collection.
@@ -679,31 +445,16 @@ The following class uses the Amazon S3 API to perform S3 operations. For example
             for ( int index=0; index < custCount; index++) {
 
                 // Get the WorkItem object from the collection.
-                BucketItem myItem = itemList.get(index);
+                String docName = itemList.get(index);
 
-                Element item = doc.createElement( "Item" );
+                Element item = doc.createElement( "Doc" );
                 root.appendChild( item );
 
                 // Set Key.
                 Element id = doc.createElement( "Key" );
-                id.appendChild( doc.createTextNode(myItem.getKey()) );
+                id.appendChild( doc.createTextNode(docName) );
                 item.appendChild( id );
-
-                // Set Owner.
-                Element name = doc.createElement( "Owner" );
-                name.appendChild( doc.createTextNode(myItem.getOwner() ) );
-                item.appendChild( name );
-
-                // Set Date.
-                Element date = doc.createElement( "Date" );
-                date.appendChild( doc.createTextNode(myItem.getDate() ) );
-                item.appendChild( date );
-
-                // Set Size.
-                Element desc = doc.createElement( "Size" );
-                desc.appendChild( doc.createTextNode(myItem.getSize() ) );
-                item.appendChild( desc );
-        }
+            }
 
             return doc;
         } catch(ParserConfigurationException e) {
@@ -724,369 +475,139 @@ The following class uses the Amazon S3 API to perform S3 operations. For example
             ex.printStackTrace();
         }
         return null;
-     }
     }
+}
 
 
-### SendMessage class
+### TextractService class
 
-The following Java code represents the **SendMessage** class. This class uses the Amazon SES API to send an email message with an attachment that represents the report.
+The following Java code represents the **TextractService** class. 
 
-   package com.example.photo;
+    package com.aws.example;
 
-    import org.apache.commons.io.IOUtils;
-    import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
-    import software.amazon.awssdk.regions.Region;
-    import software.amazon.awssdk.services.ses.SesClient;
-    import javax.activation.DataHandler;
-    import javax.activation.DataSource;
-    import javax.mail.Message;
-    import javax.mail.MessagingException;
-    import javax.mail.Session;
-    import javax.mail.internet.InternetAddress;
-    import javax.mail.internet.MimeMessage;
-    import javax.mail.internet.MimeMultipart;
-    import javax.mail.internet.MimeBodyPart;
-    import javax.mail.util.ByteArrayDataSource;
-    import java.io.ByteArrayOutputStream;
-    import java.io.IOException;
-    import java.io.InputStream;
-    import java.nio.ByteBuffer;
-    import java.util.Properties;
-    import software.amazon.awssdk.core.SdkBytes;
-    import software.amazon.awssdk.services.ses.model.SendRawEmailRequest;
-    import software.amazon.awssdk.services.ses.model.RawMessage;
-    import software.amazon.awssdk.services.ses.model.SesException;
     import org.springframework.stereotype.Component;
+    import org.w3c.dom.Element;
+    import software.amazon.awssdk.core.SdkBytes;
+    import software.amazon.awssdk.regions.Region;
+    import software.amazon.awssdk.services.textract.TextractClient;
+    import software.amazon.awssdk.services.textract.model.AnalyzeDocumentRequest;
+    import software.amazon.awssdk.services.textract.model.Document;
+    import software.amazon.awssdk.services.textract.model.FeatureType;
+    import software.amazon.awssdk.services.textract.model.AnalyzeDocumentResponse;
+    import software.amazon.awssdk.services.textract.model.Block;
+    import software.amazon.awssdk.services.textract.model.TextractException;
+    import javax.xml.parsers.DocumentBuilder;
+    import javax.xml.parsers.DocumentBuilderFactory;
+    import javax.xml.parsers.ParserConfigurationException;
+    import javax.xml.transform.Transformer;
+    import javax.xml.transform.TransformerException;
+    import javax.xml.transform.TransformerFactory;
+    import javax.xml.transform.dom.DOMSource;
+    import javax.xml.transform.stream.StreamResult;
+    import java.io.StringWriter;
+    import java.util.ArrayList;
+    import java.util.Iterator;
+    import java.util.List;
 
     @Component
-    public class SendMessages {
+    public class TextractService {
 
-    private String sender = "<enter email address>";
 
-    // The subject line for the email
-    private String subject = "Analyzed photos report";
+    public String analyzeDoc(byte[] bytes) {
 
-    // The email body for recipients with non-HTML email clients
-    private String bodyText = "Hello,\r\n" + "See the attached file for the analyzed photos report.";
 
-    // The HTML body of the email
-    private String bodyHTML = "<html>" + "<head></head>" + "<body>" + "<h1>Hello!</h1>"
-            + "<p>Please see the attached file for the report that analyzed photos in the S3 bucket.</p>" + "</body>" + "</html>";
-
-    public void sendReport(InputStream is, String emailAddress ) throws IOException {
-
-        // Convert the InputStream to a byte[]
-        byte[] fileContent = IOUtils.toByteArray(is);
-
+        List myList = new ArrayList<String>();
         try {
-            send(fileContent,emailAddress);
-        } catch (MessagingException e) {
-            e.getStackTrace();
-        }
-     }
-
-     public void send(byte[] attachment, String emailAddress) throws MessagingException, IOException {
-
-        MimeMessage message = null;
-        Session session = Session.getDefaultInstance(new Properties());
-
-        // Create a new MimeMessage object
-        message = new MimeMessage(session);
-
-        // Add subject, from, and to lines
-        message.setSubject(subject, "UTF-8");
-        message.setFrom(new InternetAddress(sender));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailAddress));
-
-        // Create a multipart/alternative child container
-        MimeMultipart msgBody = new MimeMultipart("alternative");
-
-        // Create a wrapper for the HTML and text parts
-        MimeBodyPart wrap = new MimeBodyPart();
-
-        // Define the text part
-        MimeBodyPart textPart = new MimeBodyPart();
-        textPart.setContent(bodyText, "text/plain; charset=UTF-8");
-
-        // Define the HTML part
-        MimeBodyPart htmlPart = new MimeBodyPart();
-        htmlPart.setContent(bodyHTML, "text/html; charset=UTF-8");
-
-        // Add the text and HTML parts to the child container
-        msgBody.addBodyPart(textPart);
-        msgBody.addBodyPart(htmlPart);
-
-        // Add the child container to the wrapper object
-        wrap.setContent(msgBody);
-
-        // Create a multipart/mixed parent container
-        MimeMultipart msg = new MimeMultipart("mixed");
-
-        // Add the parent container to the message
-        message.setContent(msg);
-
-        // Add the multipart/alternative part to the message
-        msg.addBodyPart(wrap);
-
-        // Define the attachment
-        MimeBodyPart att = new MimeBodyPart();
-        DataSource fds = new ByteArrayDataSource(attachment, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        att.setDataHandler(new DataHandler(fds));
-
-        String reportName = "PhotoReport.xls";
-        att.setFileName(reportName);
-
-        // Add the attachment to the message
-        msg.addBodyPart(att);
-
-        // Try to send the email
-        try {
-            System.out.println("Attempting to send an email through Amazon SES " + "using the AWS SDK for Java...");
-
-            Region region = Region.US_WEST_2;
-            SesClient client = SesClient.builder()
-                    .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+            Region region = Region.US_EAST_2;
+            TextractClient textractClient = TextractClient.builder()
                     .region(region)
                     .build();
 
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            message.writeTo(outputStream);
-            ByteBuffer buf = ByteBuffer.wrap(outputStream.toByteArray());
-            byte[] arr = new byte[buf.remaining()];
-            buf.get(arr);
+            SdkBytes sourceBytes = SdkBytes.fromByteArray(bytes);
 
-            SdkBytes data = SdkBytes.fromByteArray(arr);
-            RawMessage rawMessage = RawMessage.builder()
-                    .data(data)
+            // Get the input Document object as bytes
+            Document myDoc = Document.builder()
+                    .bytes(sourceBytes)
                     .build();
 
-            SendRawEmailRequest rawEmailRequest = SendRawEmailRequest.builder()
-                    .rawMessage(rawMessage)
+            List<FeatureType> featureTypes = new ArrayList<FeatureType>();
+            featureTypes.add(FeatureType.FORMS);
+            featureTypes.add(FeatureType.TABLES);
+
+            AnalyzeDocumentRequest analyzeDocumentRequest = AnalyzeDocumentRequest.builder()
+                    .featureTypes(featureTypes)
+                    .document(myDoc)
                     .build();
 
-            client.sendRawEmail(rawEmailRequest);
+            AnalyzeDocumentResponse analyzeDocument = textractClient.analyzeDocument(analyzeDocumentRequest);
+            List<Block> docInfo = analyzeDocument.blocks();
+            Iterator<Block> blockIterator = docInfo.iterator();
 
-        } catch (SesException e) {
-            System.err.println(e.awsErrorDetails().errorMessage());
+            while(blockIterator.hasNext()) {
+                Block block = blockIterator.next();
+                myList.add("The block type is " +block.blockType().toString());
+            }
+
+            return convertToString(toXml(myList));
+     
+         } catch (TextractException  e) {
+
+            System.err.println(e.getMessage());
             System.exit(1);
         }
-        System.out.println("Email sent with attachment.");
-        }
-       }
 
- ### WorkItem class
-
- The following Java code represents the **WorkItem** class.
-
-     package com.example.photo;
-
-    public class WorkItem {
-
-     private String key;
-     private String name;
-     private String confidence ;
-
-     public void setKey (String key) {
-        this.key = key;
-     }
-
-     public String getKey() {
-        return this.key;
-     }
-
-     public void setName (String name) {
-        this.name = name;
-     }
-
-     public String getName() {
-        return this.name;
-     }
-
-     public void setConfidence (String confidence) {
-        this.confidence = confidence;
-     }
-
-     public String getConfidence() {
-        return this.confidence;
+        return "" ;
       }
-     }
 
-### WriteExcel class
-
-The following Java code represents the **WriteExcel** class.
-
-    package com.example.photo;
-
-    import jxl.CellView;
-    import jxl.Workbook;
-    import jxl.WorkbookSettings;
-    import jxl.format.UnderlineStyle;
-    import jxl.write.Label;
-    import jxl.write.Number;
-    import jxl.write.WritableCellFormat;
-    import jxl.write.WritableFont;
-    import jxl.write.WritableSheet;
-    import jxl.write.WritableWorkbook;
-    import jxl.write.WriteException;
-    import org.springframework.stereotype.Component;
-    import java.io.IOException;
-    import java.util.List;
-    import java.util.Locale;
-
-    @Component
-    public class WriteExcel {
-
-     private WritableCellFormat timesBoldUnderline;
-     private WritableCellFormat times;
-
-     // Returns an InputStream that represents the Excel report
-     public java.io.InputStream exportExcel( List<List> list) {
+      // Convert items into XML to pass back to the view.
+      private org.w3c.dom.Document toXml(List<String> itemList) {
 
         try {
-            java.io.InputStream is = write(list);
-            return is ;
-        } catch(WriteException | IOException e) {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            org.w3c.dom.Document doc = builder.newDocument();
+
+            // Start building the XML.
+            Element root = doc.createElement( "Items" );
+            doc.appendChild( root );
+
+            // Get the elements from the collection.
+            int custCount = itemList.size();
+
+            // Iterate through the collection.
+            for ( int index=0; index < custCount; index++) {
+
+                String itemValue = itemList.get(index);
+
+                Element item = doc.createElement( "Item" );
+                root.appendChild( item );
+
+                // Set Key.
+                Element id = doc.createElement( "Doc" );
+                id.appendChild( doc.createTextNode(itemValue) );
+                item.appendChild( id );
+            }
+
+            return doc;
+        } catch(ParserConfigurationException e) {
             e.printStackTrace();
         }
         return null;
-     }
-
-     // Generates the report and returns an InputStream
-     public java.io.InputStream write( List<List> list) throws IOException, WriteException {
-        java.io.OutputStream os = new java.io.ByteArrayOutputStream() ;
-        WorkbookSettings wbSettings = new WorkbookSettings();
-
-        wbSettings.setLocale(new Locale("en", "EN"));
-
-        // Create a workbook - pass the OutputStream
-        WritableWorkbook workbook = Workbook.createWorkbook(os, wbSettings);
-        //Outer list
-        int size = list.size() ;
-
-        // Outer list
-        for (int i = 0; i < size; i++) {
-
-            // Need to get the WorkItem from each list
-            List innerList = (List) list.get(i);
-            WorkItem wi = (WorkItem)innerList.get(i);
-
-
-            workbook.createSheet(wi.getKey() +" Sheet ", 0);
-            WritableSheet excelSheet = workbook.getSheet(0);
-            createLabel(excelSheet);
-            createContent(excelSheet, innerList);
-        }
-
-        // Close the workbook
-        workbook.write();
-        workbook.close();
-
-        // Get an InputStream that represents the report
-        java.io.ByteArrayOutputStream stream = new java.io.ByteArrayOutputStream();
-        stream = (java.io.ByteArrayOutputStream)os;
-        byte[] myBytes = stream.toByteArray();
-        java.io.InputStream is = new java.io.ByteArrayInputStream(myBytes) ;
-
-        return is ;
-     }
-
-     // Create headings in the Excel sheet
-     private void createLabel(WritableSheet sheet)
-            throws WriteException {
-        // Create a times font
-        WritableFont times10pt = new WritableFont(WritableFont.TIMES, 10);
-
-	  // Define the cell format
-        times = new WritableCellFormat(times10pt);
-        // Lets automatically wrap the cells
-        times.setWrap(true);
-
-        // Create a bold font with underlining
-        WritableFont times10ptBoldUnderline = new WritableFont(WritableFont.TIMES, 10, WritableFont.BOLD, false,
-                UnderlineStyle.SINGLE);
-        timesBoldUnderline = new WritableCellFormat(times10ptBoldUnderline);
-        // Let's automatically wrap the cells
-        timesBoldUnderline.setWrap(true);
-
-        CellView cv = new CellView();
-        cv.setFormat(times);
-        cv.setFormat(timesBoldUnderline);
-        cv.setAutosize(true);
-
-        // Write a few headers
-        addCaption(sheet, 0, 0, "Photo");
-        addCaption(sheet, 1, 0, "Label");
-        addCaption(sheet, 2, 0, "Confidence");
        }
 
-      // Write the WorkItem data to the Excel report
-      private int createContent(WritableSheet sheet, List<List> list) throws WriteException {
+      private String convertToString(org.w3c.dom.Document xml) {
+        try {
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            StreamResult result = new StreamResult(new StringWriter());
+            DOMSource source = new DOMSource(xml);
+            transformer.transform(source, result);
+            return result.getWriter().toString();
 
-        int size = list.size() ;
-
-        //  List
-        for (int i = 0; i < size; i++) {
-
-                WorkItem wi = (WorkItem)list.get(i);
-
-                // Get the work item values
-                String key = wi.getKey();
-                String label = wi.getName();
-                String confidence = wi.getConfidence();
-
-                // First column
-                addLabel(sheet, 0, i + 2, key);
-                // Second column
-                addLabel(sheet, 1, i + 2, label);
-
-                // Third column
-                addLabel(sheet, 2, i + 2, confidence);
-
-          }
-          return size;
+         } catch(TransformerException ex) {
+            ex.printStackTrace();
          }
-
-       private void addCaption(WritableSheet sheet, int column, int row, String s)
-            throws WriteException {
-        Label label;
-        label = new Label(column, row, s, timesBoldUnderline);
-
-        int cc = countString(s);
-        sheet.setColumnView(column, cc);
-        sheet.addCell(label);
+        return null;
       }
-
-      private void addNumber(WritableSheet sheet, int column, int row,
-                           Integer integer) throws WriteException {
-        Number number;
-        number = new Number(column, row, integer, times);
-        sheet.addCell(number);
-      }
-
-      private void addLabel(WritableSheet sheet, int column, int row, String s)
-            throws WriteException {
-        Label label;
-        label = new Label(column, row, s, times);
-        int cc = countString(s);
-        if (cc > 200)
-            sheet.setColumnView(column, 150);
-        else
-            sheet.setColumnView(column, cc+6);
-
-        sheet.addCell(label);
-       }
-
-    private int countString (String ss) {
-        int count = 0;
-
-	// Counts each character except spaces
-        for(int i = 0; i < ss.length(); i++) {
-            if(ss.charAt(i) != ' ')
-                count++;
-        }
-        return count;
-       }
      }
 
 ## Create the HTML files
