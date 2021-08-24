@@ -27,13 +27,11 @@ In this tutorial, you create a Spring Boot application named **AWS Document Anal
 This application uses the following AWS services:
 *	Amazon Textract
 *	Amazon S3
-*	Amazon SES
-*	AWS Elastic Beanstalk
 
 #### Topics
 
 + Prerequisites
-+ Understand the AWS Photo Analyzer application
++ Understand the AWS document analyzer application
 + Create an IntelliJ project named SpringPhotoAnalyzer
 + Add the POM dependencies to your project
 + Create the Java classes
@@ -60,7 +58,7 @@ To complete the tutorial, you need the following:
 
 ### Creating the resources
 
-Create an Amazon S3 bucket named **photos[somevalue]**. Be sure to use this bucket name in your Amazon S3 Java code. For information, see [Creating a bucket](https://docs.aws.amazon.com/AmazonS3/latest/gsg/CreatingABucket.html).
+Create an Amazon S3 bucket named **doc[somevalue]**. Be sure to use this bucket name in your Amazon S3 Java code. Place a few PNG images of a PDF document in the bucket. This application reads the PNG images and displays them in the web application. For information, see [Creating a bucket](https://docs.aws.amazon.com/AmazonS3/latest/gsg/CreatingABucket.html).
 
 ## Understand the AWS document analyzer application
 
@@ -68,11 +66,11 @@ The following illustration shows the Home page of the application.
 
 ![AWS Photo Analyzer](images/home.png)
 
-The AWS document analyzer application supports uploading PDF documents to an Amazon S3 bucket. 
+The AWS document analyzer application supports uploading PDF images to an Amazon S3 bucket. 
 
 ![AWS Photo Analyzer](images/upload.png)
 
-After the PDF document is uploaded, you can select the PDF document from a drop down field. 
+After the PDF image is uploaded, you can select the image from a drop down field. 
 
 ![AWS Photo Analyzer](images/document1.png)
 
@@ -99,34 +97,20 @@ At this point, you have a new project named **SpringDocumentAnalyzer**.
 
 ![AWS Photo Analyzer](images/photo3.png)
 
-Add the following dependencies for the Amazon services (AWS SDK for Java version 2).
+  **Note:** Ensure that you are using Java 1.8 (as shown in the following **pom.xml** file).
 
-    <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>ses</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>rekognition</artifactId>
-     </dependency>
-     <dependency>
-      <groupId>software.amazon.awssdk</groupId>
-      <artifactId>s3</artifactId>
-     </dependency>
+Add the Spring Boot dependencies. The **pom.xml** file looks like the following.
 
-   **Note:** Ensure that you are using Java 1.8 (as shown in the following **pom.xml** file).
-
-   Add the Spring Boot dependencies. The **pom.xml** file looks like the following.
-
-     <?xml version="1.0" encoding="UTF-8"?>
-     <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
      <modelVersion>4.0.0</modelVersion>
-     <groupId>com.example.photo</groupId>
-     <artifactId>photo</artifactId>
-     <version>0.0.1-SNAPSHOT</version>
-     <name>photo</name>
-     <description>Demo project for Spring Boot</description>
+
+     <groupId>org.example</groupId>
+     <artifactId>SpringDocumentAnalyzer</artifactId>
+     <version>1.0-SNAPSHOT</version>
+
      <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -169,17 +153,11 @@ Add the following dependencies for the Amazon services (AWS SDK for Java version
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>javax.mail-api</artifactId>
-            <version>1.6.2</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>javax.mail-api</artifactId>
             <version>1.5.5</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>1.5.5</version>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>textract</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -192,7 +170,7 @@ Add the following dependencies for the Amazon services (AWS SDK for Java version
                 </exclusion>
             </exclusions>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>dynamodb</artifactId>
         </dependency>
@@ -208,26 +186,22 @@ Add the following dependencies for the Amazon services (AWS SDK for Java version
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
         </dependency>
-      </dependencies>
-      <build>
+     </dependencies>
+     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
-      </build>
-     </project>
+     </build>
+   </project>
 
 ## Create the Java classes
 
-Create a Java package in the **main/java** folder named **com.example.photo**.
+Create a Java package in the **main/java** folder named **com.aws.example**. The Java files go into this package.
 
-![AWS Photo Analyzer](images/photo4.png)
-
-The Java files go into this package.
-
-![AWS Photo Analyzer](images/photo5.png)
+![AWS Photo Analyzer](images/projectclasses.png)
 
 Create these Java classes:
 
