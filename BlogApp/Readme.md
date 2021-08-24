@@ -95,7 +95,7 @@ The first step is to create an Maven project.
 
 At this point, you have a new project named **SpringDocumentAnalyzer**.
 
-![AWS Photo Analyzer](images/photo3.png)
+![AWS Photo Analyzer](images/project.png)
 
   **Note:** Ensure that you are using Java 1.8 (as shown in the following **pom.xml** file).
 
