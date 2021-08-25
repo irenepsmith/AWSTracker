@@ -612,53 +612,50 @@ The following Java code represents the **TextractService** class.
 
 ## Create the HTML files
 
-At this point, you have created all of the Java files required for the AWS Photo Analyzer application. Now you create the HTML files that are required for the application's graphical user interface (GUI). Under the **resource** folder, create a **template** folder, and then create the following HTML files:
+At this point, you have created all of the Java files required for the AWS Document Analyzer application. Now you create the HTML files that are required for the application's graphical user interface (GUI). Under the **resource** folder, create a **templates** folder, and then create the following HTML files:
 
 + index.html
 + process.html
-+ upload.html
 + layout.html
 
-The **index.html** file is the application's home view. The **process.html** file represents the view for creating a report. The **upload.html** file represents the view for uploading image files to an S3 bucket. The **layout.html** file represents the menu that's visible in all views.
+The **index.html** file is the application's home view. The **process.html** file represents the view for viewing the data. The **layout.html** file represents the menu that's visible in all views.
 
 ### index.html
 
 The following HTML represents the **index.html** file.
 
     <!DOCTYPE html>
-    <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+    <html xmlns:th="http://www.thymeleaf.org">
 
     <head>
      <meta charset="utf-8" />
      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
      <meta name="viewport" content="width=device-width, initial-scale=1" />
+
      <link rel="stylesheet" th:href="|https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css|"/>
      <script th:src="|https://code.jquery.com/jquery-1.12.4.min.js|"></script>
      <script th:src="|https://code.jquery.com/ui/1.11.4/jquery-ui.min.js|"></script>
      <link rel="stylesheet" href="../public/css/styles.css" th:href="@{/css/styles.css}" />
      <link rel="icon" href="../public/images/favicon.ico" th:href="@{/images/favicon.ico}" />
-
-    <title>AWS Photo Analyzer</title>
-    </head>
+      </head>
     <body>
     <header th:replace="layout :: site-header"/>
     <div class="container">
 
-    <h2>AWS Photo Analyzer application</h2>
+     <h2>AWS Document Analyzer Application</h2>
 
-    <p>The AWS Photo Analyzer application is an example application that uses the Amazon Rekognition service and other AWS services, and the AWS SDK for Java version 2.
-        Analyzing nature photographs has never been easier! Just perform these steps:<p>
+     <p>The AWS Document Analyzer application is a sample application that uses the Amazon Textract Service as well as other AWS Services and the Java V2 SDK.
+        Analyzing PDF documents has never been easier! Simply perform these steps:<p>
 
-    <ol>
-        <li>Upload a nature photograph to an Amazon S3 bucket by choosing the <b>Upload Photos</b> menu item.</li>
-        <li>Choose <b>Choose File</b> and browse to a nature image located on your desktop.</li>
-        <li>Choose <b>Upload</b> to upload your image to an S3 bucket.</li>
-        <li>Choose <b>Get Images</b> to view the images located in the S3 bucket. All images in the bucket are displayed in the table. </li>
-        <li>Analyze the photographs and produce a report by choosing the <b>Analyze Photos</b> menu item. </li>
-        <li>Enter an email address in the email field and choose <b>Analyze Photos</b>.  </li>
-        <li>Amazon SES is used to send an email with an Excel report to the specified email recipient.</li>
-    </ol>
-    </div>
+     <ol>
+        <li>You can upload a PDF document to an Amazon S3 bucket by choosing the <i>Upload Documents</i> menu item.</li>
+        <li>Choose <i>Choose File</i> and browse to a PDF document located on your local desktop.</li>
+        <li>Choose <i>Upload</i> to upload the PDF document to an Amazon S3 bucket.</li>
+        <li>You can choose <i>Get Documents</i> to view the PDF documents located in the Amazon S3 bucket. All documents in the Amazon S3 bucket are displayed in the drop-down field. </li>
+        <li>You can analyze a given PDF document by choosing the <i>Analyze Documents</i> menu item. </li>
+        <li>Select a PDF document from the drop-down field and choose <i>Analyze Document</i>. The results are displaced in the application.  </li>
+     </ol>
+     </div>
     </body>
     </html>
 
@@ -666,178 +663,74 @@ The following HTML represents the **index.html** file.
 
 The following HTML represents the **process.html** file.
 
-    <!DOCTYPE html>
-    <html xmlns:th="http://www.thymeleaf.org">
-    <head>
+     <html xmlns:th="http://www.thymeleaf.org">
+     <head>
      <meta charset="utf-8" />
-     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-     <link rel="stylesheet" th:href="|https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css|"/>
+     <script th:src="|https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js|"></script>
      <script th:src="|https://code.jquery.com/jquery-1.12.4.min.js|"></script>
      <script th:src="|https://code.jquery.com/ui/1.11.4/jquery-ui.min.js|"></script>
-     <script src="../public/js/message.js" th:src="@{/js/message.js}"></script>
-
+     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet"/>
+     <script src="../public/js/message.js" th:src="@{/js/items.js}"></script>
      <link rel="stylesheet" href="../public/css/styles.css" th:href="@{/css/styles.css}" />
      <link rel="icon" href="../public/images/favicon.ico" th:href="@{/images/favicon.ico}" />
-
-     <title>AWS Photo Analyzer</title>
-
-     <script>
-        function myFunction() {
-            alert("The form was submitted");
-        }
-     </script>
-
     </head>
 
     <body>
-    <header th:replace="layout :: site-header"/>
+     <header th:replace="layout :: site-header"/>
 
     <div class="container">
+     <h2>AWS Document Analyzer Application</h2>
+     <div>
+        <p>Upload a PDF document to an Amazon S3 Bucket</p>
 
-    <h2>AWS Photo Analyzer application</h2>
-    <p>You can generate a report that analyzes the images in the Amazon S3 bucket. You can send the report to the following email address. </p>
-    <label for="email">Email address:</label><br>
-    <input type="text" id="email" name="email" value=""><br>
+        <form method="POST" onsubmit="myFunction()" action="/upload" enctype="multipart/form-data">
+            <input type="file" name="file"/>
+            <input type="submit" value="Submit" />
+        </form>
+     </div>
+     <div>
+     <h3>Select the Document to analyze</h3>
+        <div class="dropdown">
+            <select name="docs" id="docs">
 
-    <div>
+            </select>
+    </div>
+        <button onclick="analyeDoc()">Analyze Document </button>
+    </div>
+     <div>
         <br>
-        <p>Choose the button to obtain a report.</p>
-        <button onclick="ProcessImages()">Analyze Photos</button>
-    </div>
-    <div>
-        <h3>Download a photo to your browser</h3>
-        <p>Specify the photo to download from an Amazon S3 bucket</p>
-        <label for="photo">Photo Name:"</label><br>
-        <input type="text" id="photo" name="photo" value=""><br>
-        <p>Click the following button to download a photo</p>
-        <button onclick="DownloadImage()">Download Photo</button>
+       <div class="form-group">
+            <label for="textarea1">Amazon Textract results</label>
+            <textarea class="form-control" id="textarea1" rows="3"></textarea>
+        </div>
     </div>
     </div>
     </body>
     </html>
 
-### upload.html
-
-The following HTML represents the **upload.html** file.
-
-    <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <script th:src="|https://code.jquery.com/jquery-1.12.4.min.js|"></script>
-    <script th:src="|https://code.jquery.com/ui/1.11.4/jquery-ui.min.js|"></script>
-    <script th:src="|https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.js|"></script>
-    <script src="../public/js/items.js" th:src="@{/js/items.js}"></script>
-
-    <link rel="stylesheet" th:href="|https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css|"/>
-    <link rel="stylesheet" th:href="|https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.css|"/>
-    <link rel="stylesheet" href="../public/css/styles.css" th:href="@{/css/styles.css}" />
-    <link rel="icon" href="../public/images/favicon.ico" th:href="@{/images/favicon.ico}" />
-
-
-    <title>AWS Photo Analyzer</title>
-
-    <script>
-        function myFunction() {
-            alert("The form was submitted");
-        }
-    </script>
-    </head>
-
-    <body>
-    <header th:replace="layout :: site-header"/>
-
-    <div class="container">
-     <h2>AWS Photo Analyzer application</h2>
-     <p>Upload images to an Amazon S3 bucket. Each image will be analyzed!</p>
-
-     <form method="POST" onsubmit="myFunction()" action="/upload" enctype="multipart/form-data">
-      <input type="file" name="file" /><br/><br/>
-      <input type="submit" value="Submit" />
-     </form>
-    <div>
-    <br>
-
-    <p>Choose the following button to determine the number of images in the bucket.</p>
-
-    <button onclick="getImages()">Get Images</button>
-    <table id="myTable" class="display" style="width:100%">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Owner</th>
-            <th>Date</th>
-            <th>Size</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>No Data</td>
-            <td>No Data</td>
-            <td>No Data </td>
-            <td>No Data</td>
-        </tr>
-        </tbody>
-        <tfoot>
-        <tr>
-            <th>Name</th>
-            <th>Owner</th>
-            <th>Date</th>
-            <th>Size</th>
-        </tr>
-        </tfoot>
-        <div id="success3"></div>
-    </table>
-    </div>
-    </div>
-    </body>
-    </html>
 
 ### layout.html
 
 The following HTML represents the **layout.html** file for the application's menu.
 
      <!DOCTYPE html>
-      <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+      <html xmlns:th="http://www.thymeleaf.org">
      <head th:fragment="site-head">
       <meta charset="UTF-8" />
-      <link rel="icon" href="../public/images/favicon.ico" th:href="@{/images/favicon.ico}" />
       <script th:src="|https://code.jquery.com/jquery-1.12.4.min.js|"></script>
-       <meta th:include="this :: head" th:remove="tag"/>
+      <meta th:include="this :: head" th:remove="tag"/>
       </head>
-      <body>
-      <!-- th:hef calls a controller method - which returns the view -->
-      <header th:fragment="site-header">
-      <a href="index.html" th:href="@{/}"><img src="../public/images/site-logo.png" th:src="@{/images/site-logo.png}" /></a>
-      <a href="#" style="color: white" th:href="@{/}">Home</a>
-      <a href="#" style="color: white" th:href="@{/photo}">Upload Photos</a>
-      <a href="#"  style="color: white" th:href="@{/process}">Analyze Photos</a>
-      <div id="logged-in-info">
+     <body>
+    <header th:fragment="site-header">
+     <a href="#" style="color: white" th:href="@{/}">Home</a>
+     <a href="#"  style="color: white" th:href="@{/process}">Analyze Documents</a>
+    </header>
 
-        <form method="post" th:action="@{/logout}">
-            <input type="submit"  value="Logout"/>
-        </form>
-         </div>
-        </header>
-        <h1>Welcome</h1>
-        <body>
-        <p>Welcome to  AWS Photo Analyzer.</p>
-        </body>
-        </html>
 
 ## Create script files
 
-Both the upload and process views use script files to communicate with the Spring controller. You have to ensure that these files are part of your project; otherwise, your application won't work.
-
-+ items.js
-+ message.js
-
-Both files contain application logic that sends a request to the Spring controller. In addition, these files handle the response and set the data in the view.
+The process view use a script file to communicate with the Spring controller. You have to ensure that this file is part of your project; otherwise, your application won't work.
 
 ### items.js
 
@@ -845,146 +738,80 @@ The following JavaScript represents the **items.js** file.
 
     $(function() {
 
-    $('#myTable').DataTable( {
-        scrollY:        "500px",
-        scrollX:        true,
-        scrollCollapse: true,
-        paging:         true,
-        columnDefs: [
-            { width: 200, targets: 0 }
-        ],
-        fixedColumns: true
-     } );
+    getDocNames() ;
     } );
 
-     function getImages() {
 
-      var xhr = new XMLHttpRequest();
-      xhr.addEventListener("load", handleimages, false);
-      xhr.open("GET", "../getimages", true);   //buildFormit -- a Spring MVC controller
-      xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");//necessary
-      xhr.send();
-     }
+    function myFunction() {
+      alert("The PDF document was submitted");
+    }
 
-     function handleimages() {
+    function analyeDoc() {
 
-     var xml = event.target.responseText;
-     var oTable = $('#myTable').dataTable();
-     oTable.fnClearTable(true);
-     $(xml).find('Item').each(function () {
+     // Get the doc
+     var name = $("#docs").val();
 
-        var $field = $(this);
-        var key = $field.find('Key').text();
-        var name = $field.find('Owner').text();
-        var date = $field.find('Date').text();
-        var size = $field.find('Size').text();
+     $.ajax('/analyzeDoc', {
+        type: 'POST',  // http method
+        data: 'name=' + name ,  // data to submit
+        success: function (data, status, xhr) {
+            var xml = data
+            $(xml).find('Item').each(function () {
 
-        // Set the new data
-        oTable.fnAddData( [
-            key,
-            name,
-            date,
-            size,,]
-         );
-       });
+                var $field = $(this);
+                var doc = $field.find('Doc').text();
+
+                var oldValue = $("#textarea1").val();
+
+                if (oldValue === "") {
+                    $("#textarea1").val(doc);
+                } else {
+                    $("#textarea1").val(oldValue + "\n" + doc);
+                }
+           });
+        },
+        error: function (jqXhr, textStatus, errorMessage) {
+            $('p').append('Error' + errorMessage);
+        }
+      });
       }
 
-### message.js
+     function getDocNames() {
 
-The following JavaScript represents the **message.js** file. The **ProcessImages** function sends a request to the **/report** handler in the controller that generates a report. Notice that an email address is posted to the **Controller** method.
+     // Clear the current drop down.
+     $("#docs").empty()
 
-    $(function() {
+       $.ajax('/getdocs', {
+         type: 'GET',  // http method
+         success: function (data, status, xhr) {
 
-     } );
+            var xml = data;
+            $(xml).find('Doc').each(function () {
+               var $field = $(this);
+               var name = $field.find('Key').text();
 
-    function ProcessImages() {
-
-     // Post the values to the controller
-     var email =  $('#email').val();
-     var xhr = new XMLHttpRequest();
-     xhr.addEventListener("load", handle, false);
-     xhr.open("POST", "../report", true);   //buildFormit -- a Spring MVC controller
-     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");//necessary
-     xhr.send("email=" + email);
+              $('#docs').append($('<option/>', {
+                    value: name,
+                    text : name
+                }));
+            });
+           },
+        error: function (jqXhr, textStatus, errorMessage) {
+            $('p').append('Error' + errorMessage);
+        }
+      });
      }
-
-     function handle(event) {
-       var res = event.target.responseText;
-       alert(res) ;
-      }
-      
-      function DownloadImage(){
-
-    	//Post the values to the controller
-    	var photo =  $('#photo').val();
-    	window.location="../downloadphoto?photoKey=" + photo ;
-      	}
-
 
 **Note:** There are other CSS files located in the GitHub repository that you must add to your project. Ensure all of the files under the **resources** folder are included in your project.   
 
-## Package the project
+## Run the application
 
-Package up the project into a .jar (JAR) file that you can deploy to AWS Elastic Beanstalk by using the following Maven command.
+Using the IntelliJ IDE, you can run your application. The first time you run the Spring Boot application, you can run the application by clicking the run icon in the Spring Boot main class, as shown in this illustration. 
 
-    mvn package
-
-The JAR file is located in the target folder.    
-
-![AWS Photo Analyzer](images/photo6.png)
-
-The POM file contains the **spring-boot-maven-plugin** that builds an executable JAR file which includes the dependencies. (Without the dependencies, the application does not run on Elastic Beanstalk.) For more information, see [Spring Boot Maven Plugin](https://www.baeldung.com/executable-jar-with-maven).
-
-## Deploy to Elastic Beanstalk
-
-Sign in to the AWS Management Console, and then open the Elastic Beanstalk console. An application is the top-level container in Elastic Beanstalk that contains one or more application environments.
-
-If this is your first time accessing this service, you will see a **Welcome to AWS Elastic Beanstalk** page. Otherwise, you’ll open the Elastic Beanstalk dashboard, which lists all of your applications.
-
-#### To deploy the AWS Photo Analyzer application to Elastic Beanstalk
-
-1. Open the Elastic Beanstalk console at https://console.aws.amazon.com/elasticbeanstalk/home.
-2. In the navigation pane, choose  **Applications**, and then choose **Create a new application**. This opens a wizard that creates your application and launches an appropriate environment.
-3. On the **Create New Application** page, enter the following values:
-   + **Application Name** - AWS Photo Analyzer.
-   + **Description** - A description for the application.
-
-![AWS Photo Analyzer](images/photo7.png)
-
-4. Choose **Create**.
-5. Choose **Create a new environment**.
-6. Choose **Web server environment**.
-7. Choose **Select**.
-8. In the **Environment information** section, leave the default values.
-9. In the **Platform** section, choose **Managed platform**.
-10. For **Platform**, choose **Java** (accept the default values for the other fields).
-
-![AWS Photo Analyzer](images/photo8.png)
-
-11. In the **Application code** section, choose **Upload your code**.
-12. Choose **Local file**, and then select **Choose file**. Browse to the JAR file that you created.  
-13. Choose **Create environment**. You'll see the application being created.
-
-![AWS Photo Analyzer](images/photo9.png)
-
-When you’re done, you will see the application state the **Health** is **OK** .
-
-![AWS Photo Analyzer](images/photo10.png)
-
-14. To change the port that Spring Boot listens on, add an environment variable named **SERVER_PORT**, with the value **5000**.
-11. Add a variable named **AWS_ACCESS_KEY_ID**, and then specify your access key value.
-12. Add a variable named **AWS_SECRET_ACCESS_KEY**, and then specify your secret key value. When the variables are configured, you'll see the URL for accessing the application.
-
-![AWS Photo Analyzer](images/photo11.png)
-
-**Note:** If you don't know how to set variables, see [Environment properties and other software settings](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environments-cfg-softwaresettings.html).
-
-To access the application, open your browser and enter the URL for your application. You will see the home page for your application.
-
-![AWS Photo Analyzer](images/photo12.png)
+![AWS Tracking Application](images/run.png)
 
 ### Next steps
-Congratulations! You have created and deployed the AWS Photo Analyzer application. As stated at the beginning of this tutorial, be sure to terminate all of the resources you create while going through this tutorial to ensure that you’re no longer charged for them.
+Congratulations! You have created and deployed the AWS Document Analyzer application. As stated at the beginning of this tutorial, be sure to terminate all of the resources you create while going through this tutorial to ensure that you’re no longer charged for them.
 
 For more AWS multiservice examples, see
 [usecases](https://github.com/awsdocs/aws-doc-sdk-examples/tree/master/javav2/usecases).
