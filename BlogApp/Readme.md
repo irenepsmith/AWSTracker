@@ -1,4 +1,4 @@
-# Creating a Job Posting application using Amazon Redshift and Amazon Translate Services
+# Creating a Spring BOOT application that displays GraphQL data using the AWS AppSync Service
 
 ## Purpose
 You can create a dynamic web application that stores and queries data by using the Amazon Redshift service and the Amazon Redshift Java API V2. To interact with an Amazon Redshift table, you can use a [software.amazon.awssdk.services.redshiftdata.RedshiftDataClient](https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/redshiftdata/RedshiftDataClient.html). The application created in this AWS tutorial is a job posting web application that lets an employer, an administrator, or human resources staff alert employees or the public about a job opening within a company.
