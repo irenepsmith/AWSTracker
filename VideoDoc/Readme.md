@@ -9,7 +9,7 @@ After the application analyzes all images in the Amazon S3 bucket, it uses the A
 
 ![AWS Photo Analyzer](images/excel2.png)
 
-In this tutorial, you create a Spring Boot application named **AWS Photo Analyzer**. The Spring Boot APIs are used to build a model, different views, and a controller. For more information, see [Spring Boot - Securing Web Applications](https://www.tutorialspoint.com/spring_boot/spring_boot_securing_web_applications.htm).
+In this tutorial, you create a Spring Boot application named **AWS Photo Analyzer**. The Spring Boot APIs are used to build a model, different views, and a controller. For more information, see [Spring Boot](https://www.tutorialspoint.com/spring_boot/index.htm).
 
 This application uses the following AWS services:
 *	Amazon Rekognition
@@ -65,20 +65,20 @@ You can also download a given image from the Amazon S3 bucket by using this appl
 
 ![AWS Photo Analyzer](images/download.png)
 
-## Create an IntelliJ project named SpringPhotoAnalyzer
+## Create an IntelliJ project named SpringPhotoAnalyzerAsync
 
 1. In the IntelliJ IDE, choose **File**, **New**, **Project**.
 2. In the **New Project** dialog box, choose **Maven**, and then choose **Next**.
 3. For **GroupId**, enter **aws-spring**.
-4. For **ArtifactId**, enter **SpringPhotoAnalyzer**.
+4. For **ArtifactId**, enter **SpringPhotoAnalyzerAsync**.
 6. Choose **Next**.
 7. Choose **Finish**.
 
 ## Add the POM dependencies to your project
 
-At this point, you have a new project named **SpringPhotoAnalyzer**.
+At this point, you have a new project named **SpringPhotoAnalyzerAsync**.
 
-![AWS Photo Analyzer](images/projectpa0.png)
+![AWS Photo Analyzer](images/project.png)
 
 **Note:** Ensure that you are using Java 1.8 (as shown in the following **pom.xml** file).
 
