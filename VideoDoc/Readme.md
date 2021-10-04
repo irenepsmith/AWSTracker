@@ -3,7 +3,7 @@
 ## Purpose
 You can create a dynamic web application that analyzes nature images located in an Amazon Simple Storage Service (Amazon S3) bucket by using the Amazon Rekognition service. The application analyzes many images and generates a report that breaks down each image into a series of labels. For example, the following image shows a lake.
 
-![AWS Photo Analyzer](images/Lake1.png)
+![AWS Photo Analyzer](images/lakesun.png)
 
 After the application analyzes all images in the Amazon S3 bucket, it uses the Amazon Simple Email Service (Amazon SES) to send a dynamically created report to a given email recipient. The report is a Microsoft Excel document that contains label data for each image. 
 
