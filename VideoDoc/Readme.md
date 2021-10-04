@@ -17,7 +17,7 @@ This application uses the following AWS services:
 *	Amazon SES
 *	AWS Elastic Beanstalk
 
-**Note**: This example application uses the Asynchronous client that belongs to the AWS SDK for Java V2 for the Amazon S3 and Amazon Rekognition services.
+**Note**: This example application uses the Asynchronous client that belongs to the AWS SDK for Java V2 for the Amazon S3 and Amazon Rekognition services. For more information, see [Asynchronous programming in the AWS SDK for Java 2.x](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/asynchronous.html).
 
 #### Topics
 
@@ -201,7 +201,7 @@ Create these Java classes:
 
 ### AnalyzePhotos class
 
-The following Java code represents the **AnalyzePhotos** class. This class uses the Amazon Rekognition API to analyze the images.
+The following Java code represents the **AnalyzePhotos** class. This class uses the Amazon Rekognition API to analyze the images. Notice the use of the **RekognitionAsyncClient** object. For more information, see [Interface RekognitionAsyncClient](https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/rekognition/RekognitionAsyncClient.html). 
 
 ```java
     package com.example.photo;
