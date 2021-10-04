@@ -1311,8 +1311,8 @@ The following HTML represents the **upload.html** file.
 
 ```html
     <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
+    <html xmlns:th="http://www.thymeleaf.org">
+    <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -1354,6 +1354,12 @@ The following HTML represents the **upload.html** file.
     <p>Choose the following button to determine the number of images in the bucket.</p>
 
     <button onclick="getImages()">Get Images</button>
+    <div  id ="bars3"  class="progress">
+        <div class="progress-bar progress-bar-striped active" role="progressbar"
+             aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:90%">
+            Retrieving Amazon S3 images...
+        </div>
+    </div>
     <table id="myTable" class="display" style="width:100%">
         <thead>
         <tr>
@@ -1426,6 +1432,7 @@ The following JavaScript represents the **items.js** file.
 ```javascript
     $(function() {
 
+    $("#bars3").hide()
     $('#myTable').DataTable( {
         scrollY:        "500px",
         scrollX:        true,
@@ -1435,15 +1442,18 @@ The following JavaScript represents the **items.js** file.
             { width: 200, targets: 0 }
         ],
         fixedColumns: true
-      } );
      } );
+    } );
 
-    function getImages() {
+   function getImages() {
+
+    $("#bars3").show()
 
       $.ajax('/getimages', {
         type: 'GET',  // http method
         success: function (data, status, xhr) {
 
+            $("#bars3").hide()
             var xml = data
             var oTable = $('#myTable').dataTable();
             oTable.fnClearTable(true);
@@ -1463,9 +1473,9 @@ The following JavaScript represents the **items.js** file.
                     size]
                 );
             });
-          },
-        });
-      }
+        },
+      });
+    }
 
 ```
 
