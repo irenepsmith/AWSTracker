@@ -19,6 +19,8 @@ This application uses the following AWS services:
 
 **Note**: This example application uses the Asynchronous client that belongs to the AWS SDK for Java V2 for the Amazon S3 and Amazon Rekognition services. For more information, see [Asynchronous programming in the AWS SDK for Java 2.x](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/asynchronous.html).
 
+**Note** To read a similiar use case that uses the synchronous client that belongs to the AWS SDK for Java V2 for the Amazon S3 and Amazon Rekognition services, see [Creating a dynamic web application that analyzes photos using the AWS SDK for Java](https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/javav2/usecases/creating_photo_analyzer_app).
+
 #### Topics
 
 + Prerequisites
