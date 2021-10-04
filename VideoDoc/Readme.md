@@ -184,13 +184,9 @@ Ensure that the **pom.xml** file looks like the following.
 
 ## Create the Java classes
 
-Create a Java package in the **main/java** folder named **com.example.photo**.
+Create a Java package in the **main/java** folder named **com.example.photo**. The Java files go into this package.
 
-![AWS Photo Analyzer](images/projectpa.png)
-
-The Java files go into this package.
-
-![AWS Photo Analyzer](images/projectpa1.png)
+![AWS Photo Analyzer](images/project1.png)
 
 Create these Java classes:
 
