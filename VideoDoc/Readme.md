@@ -55,15 +55,15 @@ Create an Amazon S3 bucket named **photos[somevalue]**. Be sure to use this buck
 
 The AWS Photo Analyzer application supports uploading images to an Amazon S3 bucket. After the images are uploaded, you can view the images that are analyzed.
 
-![AWS Photo Analyzer](images/upload3.png)
+![AWS Photo Analyzer](images/client.png)
 
 To generate a report, enter an email address and choose **Analyze Photos**.
 
-![AWS Photo Analyzer](images/Report2.png)
+![AWS Photo Analyzer](images/client2.png)
 
 You can also download a given image from the Amazon S3 bucket by using this application. Simply specify the image name and choose the **Download Photo** button. The image is downloaded to your browser, as shown in this illustration. 
 
-![AWS Photo Analyzer](images/download.png)
+![AWS Photo Analyzer](images/client3.png)
 
 ## Create an IntelliJ project named SpringPhotoAnalyzerAsync
 
