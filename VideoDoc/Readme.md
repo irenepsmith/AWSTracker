@@ -1,7 +1,7 @@
 #  Creating a dynamic web application that asynchronously analyzes photos using the AWS SDK for Java 
 
 ## Purpose
-You can create a dynamic web application that analyzes nature images located in an Amazon Simple Storage Service (Amazon S3) bucket by using the Amazon Rekognition service. The application analyzes many images and generates a report that breaks down each image into a series of labels. For example, the following image shows a lake.
+You can create a dynamic web application that analyzes nature images located in an Amazon Simple Storage Service (Amazon S3) bucket by using the Amazon Rekognition service. The application analyzes multiple images and generates a report that breaks down each image into a series of labels. For example, the following image shows a lake.
 
 ![AWS Photo Analyzer](images/lakesun.png)
 
@@ -19,7 +19,7 @@ This application uses the following AWS services:
 
 **Note**: This example application uses the Asynchronous client that belongs to the AWS SDK for Java V2 for the Amazon S3 and Amazon Rekognition services. For more information, see [Asynchronous programming in the AWS SDK for Java 2.x](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/asynchronous.html).
 
-**Note** To read a similiar use case that uses the synchronous client that belongs to the AWS SDK for Java V2 for the Amazon S3 and Amazon Rekognition services, see [Creating a dynamic web application that analyzes photos using the AWS SDK for Java](https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/javav2/usecases/creating_photo_analyzer_app).
+**Note** To read a similiar use case that uses the AWS SDK for Java V2 synchronous clients, see [Creating a dynamic web application that analyzes photos using the AWS SDK for Java](https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/javav2/usecases/creating_photo_analyzer_app).
 
 #### Topics
 
