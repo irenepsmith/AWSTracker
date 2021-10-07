@@ -500,22 +500,22 @@ The **cshtml.html** file is the application's home view.
 
 ### Create the JS File
 
-This application has a **contact_me.js** file that is used to send requests to the Spring Controller. Place this file in the **resources\public\js** folder. 
+This application has a **site.js** file that is located in the JS folder and is used to send requests to the .NET Controller. Add the following JavaScript code to this file.  
 
 ```javascript
-    $(function() {
-    $("#SendButton" ).click(function($e) {
+  $(function () {
+    $("#SendButton").click(function ($e) {
 
         var body = $('#body').val();
         var lang = $('#lang option:selected').text();
-        if (body == '' ){
+        if (body == '') {
             alert("Please enter text");
             return;
         }
 
-        $.ajax('/addMessage', {
+        $.ajax('home/PublishMessage', {
             type: 'POST',
-            data: 'lang=' + lang+'&body=' + body,
+            data: 'lang=' + lang + '&body=' + body,
             success: function (data, status, xhr) {
 
                 alert(data)
@@ -525,88 +525,89 @@ This application has a **contact_me.js** file that is used to send requests to t
                 $('p').append('Error' + errorMessage);
             }
         });
-      } );
-    } );
-    
-    function subEmail(){
-     var mail = $('#inputEmail1').val();
-     var result = validate(mail)
-     if (result == false) {
-        alert (mail + " is not valid. Please specify a valid email.");
-        return;
-     }
+      });
+    });
 
-     $.ajax('/addEmail', {
+   function subEmail() {
+     var mail = $('#inputEmail1').val();
+    var result = validate(mail)
+    if (result == false) {
+         alert(mail + " is not valid. Please specify a valid email.");
+          return;
+    }
+
+    $.ajax('home/AddEmailSub', {
         type: 'POST',
         data: 'email=' + mail,
         success: function (data, status, xhr) {
-            alert("Subscription validation is "+data)
+            alert("Subscription validation is " + data)
         },
         error: function (jqXhr, textStatus, errorMessage) {
             $('p').append('Error' + errorMessage);
         }
-      });
-     }
+     });
+    }
 
-     function getSubs() {
-      $.ajax('/getSubs', {
-        type: 'GET', 
+   function delSub(event) {
+    var mail = $('#inputEmail1').val();
+    var result = validate(mail)
+
+    if (result == false) {
+        alert(mail + " is not valid. Please specify a valid email");
+        return;
+    }
+
+    $.ajax('home/RemoveEmailSub', {
+        type: 'POST',  // http GET method
+        data: 'email=' + mail,
+        success: function (data, status, xhr) {
+
+            alert (data);
+        },
+        error: function (jqXhr, textStatus, errorMessage) {
+            $('p').append('Error' + errorMessage);
+        }
+     });
+    }
+
+   function subscribe() {
+
+    $.ajax({
+        url: 'home/GetAjaxValue',
         success: function (data, status, xhr) {
 
             $('.modal-body').empty();
             var xml = data;
-            $(xml).find('Sub').each(function ()  {
+            $(xml).find('Sub').each(function () {
 
                 var $field = $(this);
                 var email = $field.find('email').text();
 
                 // Append this data to the main list.
-                $('.modal-body').append("<p><b>"+email+"</b></p>");
+                $('.modal-body').append("<p><b>" + email + "</b></p>");
             });
             $("#myModal").modal();
         },
         error: function (jqXhr, textStatus, errorMessage) {
             $('p').append('Error' + errorMessage);
         }
-       });
-      }
+     });
+   }
 
-     function delSub(event) {
-       var mail = $('#inputEmail1').val();
-       var result = validate(mail)
-
-      if (result == false) {
-       alert (mail + " is not valid. Please specify a valid email");
-       return;
-      }
-
-     $.ajax('/delSub', {
-        type: 'POST',  // http GET method
-        data: 'email=' + mail,
-        success: function (data, status, xhr) {
-
-            alert("Subscription validation is "+data);
-        },
-        error: function (jqXhr, textStatus, errorMessage) {
-            $('p').append('Error' + errorMessage);
-        }
-      });
+   function validateEmail(email) {
+    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
     }
 
-     function validateEmail(email) {
-       const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-       return re.test(email);
-      }
-
-     function validate(email) {
-      const $result = $("#result");
+    function validate(email) {
+     const $result = $("#result");
 
      if (validateEmail(email)) {
-        return true ;
-      } else {
-        return false ;
+        return true;
+     } else {
+        return false;
      }
-    }
+   }
  ```
 
 ## Run the application
@@ -617,8 +618,5 @@ Using Visual Studio, you can run your application. After it starts, you will see
 
 
 ### Next steps
-Congratulations! You have created a Spring Boot application that contains subscription and publish functionality. As stated at the beginning of this tutorial, be sure to terminate all of the resources you create while going through this tutorial to ensure that you’re not charged.
-
-For more AWS multiservice examples, see
-[usecases](https://github.com/awsdocs/aws-doc-sdk-examples/tree/master/javav2/usecases).
+Congratulations! You have created a .NET MVC application that contains subscription and publish functionality. As stated at the beginning of this tutorial, be sure to terminate all of the resources you create while going through this tutorial to ensure that you’re not charged.
 
