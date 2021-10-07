@@ -208,7 +208,7 @@ The following C# code represents the **HomeController** class. Becasue the Async
 
 ### SnsService class
 
-The following C# code represents the **SnsService** class. This class uses the AWD .NET SNS API to interact with Amazon SNS. For example, the **subEmail** method uses the email address to subscribe to the Amazon SNS topic. Likewise, the **unSubEmail** method unsubscibes from the Amazon SNS topic. The **pubTopic** publishes a message. 
+The following C# code represents the **SnsService** class. This class uses the AWS .NET SNS API to interact with Amazon SNS. For example, the **subEmail** method uses the email address to subscribe to the Amazon SNS topic. Likewise, the **unSubEmail** method unsubscibes from the Amazon SNS topic. The **pubTopic** publishes a message. The **TranslateBody** method uses the Amazon Translate Service to translate the message if requested by the user.  
 
 ```csharp
      
@@ -400,13 +400,11 @@ The following C# code represents the **SnsService** class. This class uses the A
 
 **Note:** Make sure that you assign the SNS topic ARN to the **topicArn** data member. Otherwise, your code does not work. 
 
-## Create the HTML file
+## Modify the cshtml file
 
-At this point, you have created all of the Java files required for this example application. Now create HTML files that are required for the application's view. Under the resource folder, create a **templates** folder, and then create the following HTML files:
+At this point, you have created all of the .NET classes required for this example application. Now modify the index.cshtml file required for the application's view. This file exists in the Views/Home folder, as shown in this illustration. 
 
-+ index.html
-+ layout.html
-+ sub.html
+![AWS Tracking Application](images/home.png)
 
 ### index.html
 The **index.html** file is the application's home view. 
