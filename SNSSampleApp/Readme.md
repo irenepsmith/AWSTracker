@@ -110,7 +110,7 @@ Once you add these packages, you can use the AWS SDK for .NET in your project.
 ![AWS Tracking Application](images/nuget.png)
 
 
- ## Create the Java classes
+ ## Create the .NET classes
  
  Create a Java package in the main/java folder named **com.spring.sns**. The Java classes go into this package. 
  
