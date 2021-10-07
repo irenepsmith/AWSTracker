@@ -91,7 +91,7 @@ At this point, you have a new project named **SNSApplication**. You must add the
 
 Once you add these packages, you can use the AWS SDK for .NET in your project. 
 
-1. In the Solution Explorer, click Visual Studio, right click **Packages**.
+1. In the Solution Explorer, right click **Packages**.
 
 2. Select **Manage NuGet Packages**.
 
