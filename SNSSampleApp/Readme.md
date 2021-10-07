@@ -89,7 +89,26 @@ At this point, you have a new project named **SNSApplication**. You must add the
 
 ![AWS Tracking Application](images/packages.png)
 
-Once you add these packages, you  can use the AWS SDK for .NET in your project. 
+Once you add these packages, you can use the AWS SDK for .NET in your project. 
+
+1. In the Solution Explorer, click Visual Studio, right click **Packages**.
+
+2. Select **Manage NuGet Packages**.
+
+3. Choose **Browse**.
+
+4. In the **Search** field, specify **AWSSDK.Core**.  
+
+5. Choose **Next**.
+
+6. Choose **Download**.
+
+**Note**: Repeat this process for the **AWSSDK.Simplenotificationservice** and **AWSSDK.Translate** packages. 
+
+**Tip**: If you do not see these AWS Packages, then ensure that your NuGet is properly configured to use **nuget.org**, as shown in this illustration. 
+
+![AWS Tracking Application](images/nuget.png)
+
 
  ## Create the Java classes
  
