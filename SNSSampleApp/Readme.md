@@ -221,6 +221,7 @@ The following C# code represents the **SnsService** class. This class uses the A
     using Amazon.Translate;
     using Amazon.Translate.Model;
     using System.Xml;
+    using Amazon;
 
     namespace MyMVCApplication.Controllers
    {
@@ -384,7 +385,7 @@ The following C# code represents the **SnsService** class. This class uses the A
         
         private String TranslateBody(String msg, String lan)
         {
-            var translateClient = new AmazonTranslateClient();
+            var translateClient = new AmazonTranslateClient(RegionEndpoint.USEast2);
             var request = new TranslateTextRequest();
             request.SourceLanguageCode = "en" ;
             request.TargetLanguageCode= lan;
@@ -406,127 +407,75 @@ At this point, you have created all of the .NET classes required for this exampl
 
 ![AWS Tracking Application](images/home.png)
 
-### index.html
-The **index.html** file is the application's home view. 
+### cshtml.html
+The **cshtml.html** file is the application's home view. 
 
 ```html
-    <!DOCTYPE html>
-    <html xmlns:th="https://www.thymeleaf.org">
-    <head>
-     <meta charset="utf-8" />
-     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-     <meta name="viewport" content="width=device-width, initial-scale=1" />
-     <script th:src="|https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js|"></script>
-     <link rel="stylesheet" th:href="|https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css|"/>
-     <link rel="stylesheet" href="../public/css/styles.css" th:href="@{/css/styles.css}" />
-     <link rel="icon" href="../public/img/favicon.ico" th:href="@{/img/favicon.ico}" />
+ @{
+    ViewData["Title"] = "Home Page";
+}
 
-    <title>AWS Job Posting Example</title>
-    </head> 
+<div class="text-center">
+   
+    <h3>Welcome to the Amazon  Simple Notification Service ASP.NET app</h3>
+</div>
 
-     <body>
-     <header th:replace="layout :: site-header"/>
-     <div class="container">
+<div class="container">
 
-     <h3>Welcome to the Amazon Simple Notification Service example app</h3>
-     <p>Now is: <b th:text="${execInfo.now.time}"></b></p>
-     <p>The Amazon Simple Notification Service example uses multiple AWS Services and the Java V2 API. Perform these steps:<p>
-     <ol>
-        <li>You can subscribe to a SNS topic by choosing the <i>Manage Subscriptions</i> menu item.</li>
-        <li>Enter a valid email address and then choose <i>Subscribe</i>.</li>
-        <li>The sample application subscribes to the endpoint by using the SNS Java API V2.</li>
-        <li>You can view all the email addresses that have subscribed by choosing the <i>List Subscriptions</i> menu item.</li>
-        <li>You can unSubscribe by entering the email address and choosing <i>UnSubscribe</i>. </li>
-        <li>You can publish a message by entering a message and choosing <i>Publish</i>.
-        <li>All subscribed email recipients will receive the published message.</li>
-       </ol>
-      <div>
-     </body>
-    </html>
-```
-	   	
-
-### layout.html
-The following code represents the **layout.html** file that represents the application's menu.
-
-```html
-      <!DOCTYPE html>
-      <html xmlns:th="http://www.thymeleaf.org">
-     <head th:fragment="site-head">
-     <meta charset="UTF-8" />
-     <link rel="icon" href="../public/img/favicon.ico" th:href="@{/img/favicon.ico}" />
-     <script th:src="|https://code.jquery.com/jquery-1.12.4.min.js|"></script>
-     <meta th:include="this :: head" th:remove="tag"/>
-    </head>
-    <header th:fragment="site-header">
-     <a href="#" style="color: white" th:href="@{/}">Home</a>
-     <a href="#" style="color: white" th:href="@{/subscribe}">Manage Subscriptions</a>
-     </header>
-    </html>
-```
-
-### add.html
-The **sub.html** file is the application's view that manages Amazon SNS Subscriptions. 
-
-```html
-     <!DOCTYPE html>
-     <html xmlns:th="https://www.thymeleaf.org" lang="">
-    <head>
-     <meta charset="UTF-8" />
-     <title>Subscription</title>
-
-     <script th:src="|https://code.jquery.com/jquery-1.12.4.min.js|"></script>
-     <script th:src="|https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js|"></script>
-     <link rel="stylesheet" th:href="|https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css|"/>
-     <script src="../public/js/contact_me.js" th:src="@{/js/contact_me.js}"></script>
-      <link rel="stylesheet" href="../public/css/styles.css" th:href="@{/css/styles.css}" />
-    </head>
-    <body>
-    <header th:replace="layout :: site-header"/>
-    <div class="container">
-     <p>Now is: <b th:text="${execInfo.now.time}"></b></p>
+    <div>
+        <p>The Amazon Simple Notification Service example uses multiple AWS Services and the AWS SDK for .NET. Perform these steps:<p>
+            <ol>
+                <li>Enter a valid email address and then choose <i>Subscribe</i>.</li>
+                <li>The sample application subscribes to the endpoint by using the SNS .NET API.</li>
+                <li>You can view all the email addresses that have subscribed by choosing the <i>List Subscriptions</i> menu item.</li>
+                <li>You can unSubscribe by entering the email address and choosing <i>UnSubscribe</i>. </li>
+                <li>You can publish a message by entering a message, specifying a language, and choosing <i>Publish</i>.
+                <li>All subscribed email recipients will receive the published message.</li>
+            </ol>
+    </div>
      <div class="row">
-         <div class="col">
-            <h4>Enter an email address<h3>
-                <input type="email" class="form-control" id="inputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-                <div class="clearfix mt-40">
+        <div class="col">
+            <h4>
+                Enter an email address<h3>
+                    <input type="email" class="form-control" id="inputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                    <div class="clearfix mt-40">
 
-                    <!-- Button trigger modal -->
-                    <button type="button"  onclick="subEmail() "class="btn btn-primary" >
-                        Subscribe
-                    </button>
-                    <button type="button" class="btn btn-primary" onclick="getSubs()">
-                        List Subscriptions
-                    </button>
-                    <button type="button" onclick="delSub()" class="btn btn-primary" >
-                        UnSubscribe
-                    </button>
+                        <!-- Button trigger modal -->
+                        <button type="button" onclick="subEmail() " class="btn btn-primary">
+                            Subscribe
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="subscribe()">
+                            List Subscriptions
+                        </button>
+                        <button type="button" onclick="delSub()" class="btn btn-primary">
+                            UnSubscribe
+                        </button>
 
-                    <!-- Modal -->
-                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLongTitle">SNS Email Subscriptions</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
+                        <!-- Modal -->
+                        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLongTitle">SNS Email Subscriptions</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
 
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-           </div>
-         </div>
-         <hr style="width:50%;text-align:left;margin-left:0">
-         <h4>Enter a message to publish</h4>
-        <div class="col-lg-12 mx-auto">
+        </div>
+    </div>
+    <hr style="width:50%;text-align:left;margin-left:0">
+    <h4>Enter a message to publish</h4>
+    <div class="col-lg-12 mx-auto">
         <div class="control-group">
             <div class="form-group floating-label-form-group controls mb-0 pb-2">
                 <textarea class="form-control" id="body" rows="5" placeholder="Body" required="required" data-validation-required-message="Please enter a description."></textarea>
@@ -544,10 +493,11 @@ The **sub.html** file is the application's view that manages Amazon SNS Subscrip
         </div>
         <button type="submit" class="btn btn-primary btn-xl" id="SendButton">Publish</button>
     </div>
-    </div>
-    </body>
-    </html>
-  ```
+</div>
+```
+  	
+
+
 ### Create the JS File
 
 This application has a **contact_me.js** file that is used to send requests to the Spring Controller. Place this file in the **resources\public\js** folder. 
@@ -659,48 +609,12 @@ This application has a **contact_me.js** file that is used to send requests to t
     }
  ```
 
-## Create a JAR file for the application
+## Run the application
 
-Package up the project into a .jar (JAR) file that you can deploy to Elastic Beanstalk by using the following Maven command.
+Using Visual Studio, you can run your application. After it starts, you will see the HOME page, as shown in this illustration. 
 
-	mvn package
+![AWS Tracking Application](images/run.png)
 
-The JAR file is located in the target folder.
-
-![AWS Tracking Application](images/pic6.png)
-
-The POM file contains the **spring-boot-maven-plugin** that builds an executable JAR file that includes the dependencies. Without the dependencies, the application does not run on Elastic Beanstalk. For more information, see [Spring Boot Maven Plugin](https://www.baeldung.com/executable-jar-with-maven).
-
-## Deploy the application to Elastic Beanstalk
-
-Sign in to the AWS Management Console, and then open the Elastic Beanstalk console. An application is the top-level container in Elastic Beanstalk that contains one or more application environments (for example prod, qa, and dev, or prod-web, prod-worker, qa-web, qa-worker).
-
-If this is your first time accessing this service, you will see a **Welcome to AWS Elastic Beanstalk** page. Otherwise, you’ll see the Elastic Beanstalk Dashboard, which lists all of your applications.
-
-#### To deploy the application to Elastic Beanstalk
-
-1. Open the Elastic Beanstalk console at https://console.aws.amazon.com/elasticbeanstalk/home.
-2. In the navigation pane, choose  **Applications**, and then choose **Create a new application**. This opens a wizard that creates your application and launches an appropriate environment.
-3. On the **Create New Application** page, enter the following values:
-   + **Application Name** - Subscribe App
-   + **Description** - A description for the application
-4. Choose **Create**.
-5. Choose **Create a new environment**.
-6. Choose **Web server environment**.
-7. Choose **Select**.
-8. In the **Environment information** section, leave the default values.
-9. In the **Platform** section, choose **Managed platform**.
-10. For **Platform**, choose **Java** (accept the default values for the other fields).
-11. In the **Application code** section, choose **Upload your code**.
-12. Choose **Local file**, and then select **Choose file**. Browse to the JAR file that you created.  
-13. Choose **Create environment**. You'll see the application being created. When you’re done, you will see the application state the **Health** is **Ok** .
-14. To change the port that Spring Boot listens on, add an environment variable named **SERVER_PORT**, with the value **5000**.
-11. Add a variable named **AWS_ACCESS_KEY_ID**, and then specify your access key value.
-12. Add a variable named **AWS_SECRET_ACCESS_KEY**, and then specify your secret key value. After the variables are configured, you'll see the URL for accessing the application.
-
-**Note:** If you don't know how to set variables, see [Environment properties and other software settings](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environments-cfg-softwaresettings.html).
-
-To access the application, open your browser and enter the URL for your application. You will see the Home page for your application.
 
 ### Next steps
 Congratulations! You have created a Spring Boot application that contains subscription and publish functionality. As stated at the beginning of this tutorial, be sure to terminate all of the resources you create while going through this tutorial to ensure that you’re not charged.
