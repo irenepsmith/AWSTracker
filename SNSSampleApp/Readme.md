@@ -208,239 +208,171 @@ The following C# code represents the **HomeController** class. Becasue the Async
 
 ### SnsService class
 
-The following Java code represents the **SnsService** class. This class uses the Java V2 SNS API to interact with Amazon SNS. For example, the **subEmail** method uses the email address to subscribe to the Amazon SNS topic. Likewise, the **unSubEmail** method unsubscibes from the Amazon SNS topic. The **pubTopic** publishes a message. 
+The following C# code represents the **SnsService** class. This class uses the AWD .NET SNS API to interact with Amazon SNS. For example, the **subEmail** method uses the email address to subscribe to the Amazon SNS topic. Likewise, the **unSubEmail** method unsubscibes from the Amazon SNS topic. The **pubTopic** publishes a message. 
 
-```java
-     package com.spring.sns;
+```csharp
+     
+     using System;
+     using System.Threading;
+     using System.Collections.Generic;
+     using System.Threading.Tasks;
+     using Amazon.SimpleNotificationService;
+     using Amazon.SimpleNotificationService.Model;
+     using Amazon.Translate;
+     using System.Xml;
 
-     import org.springframework.stereotype.Component;
-     import org.w3c.dom.Document;
-     import org.w3c.dom.Element;
-     import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
-     import software.amazon.awssdk.services.sns.model.ListSubscriptionsByTopicRequest;
-     import software.amazon.awssdk.regions.Region;
-     import software.amazon.awssdk.services.sns.SnsClient;
-     import software.amazon.awssdk.services.sns.model.*;
-     import javax.xml.parsers.DocumentBuilder;
-     import javax.xml.parsers.DocumentBuilderFactory;
-     import javax.xml.parsers.ParserConfigurationException;
-     import javax.xml.transform.Transformer;
-     import javax.xml.transform.TransformerException;
-     import javax.xml.transform.TransformerFactory;
-     import javax.xml.transform.dom.DOMSource;
-     import javax.xml.transform.stream.StreamResult;
-     import java.io.StringWriter;
-     import java.util.ArrayList;
-     import java.util.List;
+     namespace MyMVCApplication.Controllers
+     {
+      public class SnsService
+      {
 
-     @Component
-     public class SnsService {
+        private static String topicArn = "<ENTER YOUR TOPIC ARN>";
 
-     String topicArn = "<Enter your TOPIC ARN>";
+        public async Task<String> UnSubEmail(String email)
+        {
 
-     private SnsClient getSnsClient() {
-
-        Region region = Region.US_WEST_2;
-        SnsClient snsClient = SnsClient.builder()
-                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
-                .region(region)
-                .build();
-
-        return snsClient;
-     }
-
-     public String pubTopic(String message, String lang) {
-
-        try {
-            String body;
-            Region region = Region.US_WEST_2;
-            TranslateClient translateClient = TranslateClient.builder()
-                    .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
-                    .region(region)
-                    .build();
-
-
-            if (lang.compareTo("English")==0) {
-                    body = message;
-
-            } else if(lang.compareTo("French")==0) {
-
-                    TranslateTextRequest textRequest = TranslateTextRequest.builder()
-                            .sourceLanguageCode("en")
-                            .targetLanguageCode("fr")
-                            .text(message)
-                            .build();
-
-                    TranslateTextResponse textResponse = translateClient.translateText(textRequest);
-                    body = textResponse.translatedText();
-
-            } else  {
-
-                TranslateTextRequest textRequest = TranslateTextRequest.builder()
-                        .sourceLanguageCode("en")
-                        .targetLanguageCode("es")
-                        .text(message)
-                        .build();
-
-                TranslateTextResponse textResponse = translateClient.translateText(textRequest);
-                body = textResponse.translatedText();
-            }
-
-            SnsClient snsClient =  getSnsClient();
-            PublishRequest request = PublishRequest.builder()
-                    .message(body)
-                    .topicArn(topicArn)
-                    .build();
-
-            PublishResponse result = snsClient.publish(request);
-            return " Message sent in " +lang +". Status was " + result.sdkHttpResponse().statusCode();
-
-        } catch (SnsException e) {
-            System.err.println(e.awsErrorDetails().errorMessage());
-            System.exit(1);
+            var client = new AmazonSimpleNotificationServiceClient();
+            var arnValue = await GetSubArn(client, email);
+            await RemoveSub(client, arnValue);
+            return email + " was successfully deleted!";
         }
-        return "Error - msg not sent";
-      }
 
-      public void unSubEmail(String emailEndpoint) {
-
-      try {
-
-         String subscriptionArn = getTopicArnValue(emailEndpoint);
-         SnsClient snsClient =  getSnsClient();
-
-         UnsubscribeRequest request = UnsubscribeRequest.builder()
-                 .subscriptionArn(subscriptionArn)
-                 .build();
-
-         snsClient.unsubscribe(request);
-
-     } catch (SnsException e) {
-        System.err.println(e.awsErrorDetails().errorMessage());
-        System.exit(1);
-      }
-     }
-
-     // Returns the Topic ARN based on the given endpoint
-     private String getTopicArnValue(String endpoint){
-
-        SnsClient snsClient =  getSnsClient();
-        try {
-            String subArn = "";
-            ListSubscriptionsByTopicRequest request = ListSubscriptionsByTopicRequest.builder()
-                    .topicArn(topicArn)
-                    .build();
+        public async Task<String> pubTopic(String body, String lang)
+        {
+            var client = new AmazonSimpleNotificationServiceClient();
+           var msgId = await PublishMessage(client, body);
+            return msgId;
+        }
 
 
-            ListSubscriptionsByTopicResponse result = snsClient.listSubscriptionsByTopic(request);
-            List<Subscription> allSubs  = result.subscriptions();
+        public async Task<String> subEmail(String email)
+        {
+            var client = new AmazonSimpleNotificationServiceClient();
+            var subArn = await SubscribeEmail(client, email);
+            return subArn;
+        }
 
-            for (Subscription sub: allSubs) {
 
-            if (sub.endpoint().compareTo(endpoint)==0) {
+        public async Task<String> getSubs()
+        {
+            var client = new AmazonSimpleNotificationServiceClient();
+            var subscriptions = await GetSubscriptionsListAsync(client);
+            var val = DisplaySubscriptionList(subscriptions);
+            return val;
+        }
 
-                subArn = sub.subscriptionArn();
-                return subArn;
+        public static async Task<String> RemoveSub(IAmazonSimpleNotificationService client, String subArn)
+        {
+            var request = new UnsubscribeRequest();
+            request.SubscriptionArn = subArn;
+            var cancelToken = new CancellationToken();
+            await client.UnsubscribeAsync(request, cancelToken);
+
+            return "";//response.MessageId;
+        }
+
+        public static async Task<String> GetSubArn(IAmazonSimpleNotificationService client, String email)
+        {
+            var request = new ListSubscriptionsByTopicRequest();
+            request.TopicArn = topicArn;
+            var subArn = "";
+
+            var cancelToken = new CancellationToken();
+            var response = await client.ListSubscriptionsByTopicAsync(request, cancelToken);
+            List<Subscription> allSubs = response.Subscriptions;
+
+            // Get the ARN Value for this subscription.
+            foreach (Subscription sub in allSubs)
+            {
+                if (sub.Endpoint.Equals(email))
+                {
+                    subArn = sub.SubscriptionArn;
+                    return subArn;
+
+                }
+            }
+            return "";
+        }
+
+        public static async Task<String> PublishMessage(IAmazonSimpleNotificationService client, String body)
+        {
+            var request = new PublishRequest();
+            request.Message = body;
+            request.TopicArn = topicArn;
+           
+            var cancelToken = new CancellationToken();
+            var response = await client.PublishAsync(request, cancelToken);
+
+            return response.MessageId;
+        }
+
+
+        public static async Task<String> SubscribeEmail(IAmazonSimpleNotificationService client, String email)
+        {
+            var request = new SubscribeRequest();
+            request.Protocol = "email";
+            request.Endpoint = email;
+            request.TopicArn = topicArn;
+            request.ReturnSubscriptionArn = true;
+
+            var cancelToken = new CancellationToken();
+            var response = await client.SubscribeAsync(request, cancelToken);
+            
+            return response.SubscriptionArn;
+        }
+
+
+        public static async Task<List<Subscription>> GetSubscriptionsListAsync(IAmazonSimpleNotificationService client)
+        {
+            var request = new ListSubscriptionsByTopicRequest();
+            var cancelToken = new CancellationToken();
+            var response = await client.ListSubscriptionsByTopicAsync(topicArn, "", cancelToken);
+            return response.Subscriptions;
+        }
+
+     
+        public String DisplaySubscriptionList(List<Subscription> subscriptionList)
+        {
+
+            var email = ""; 
+            List<String> emailList = new List<string>();
+            foreach (var subscription in subscriptionList)
+            {
+                emailList.Add(subscription.Endpoint);
+                email = subscription.Endpoint;
              }
-           }
-          } catch (SnsException e) {
-            System.err.println(e.awsErrorDetails().errorMessage());
-            System.exit(1);
-          }
-         return "";
+
+            var xml = GenerateXML(emailList);
+            return xml; 
         }
 
-       // Create a Subsciption of the given email address.
-       public String subEmail(String email) {
+        // Convert the list to XML to pass back to the view.
+        private String GenerateXML(List<string> subsList)
+        {
+            XmlDocument doc = new XmlDocument();
+            XmlNode docNode = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
+            doc.AppendChild(docNode);
 
-       try {
-            SnsClient snsClient =  getSnsClient();
-            SubscribeRequest request = SubscribeRequest.builder()
-                    .protocol("email")
-                    .endpoint(email)
-                    .returnSubscriptionArn(true)
-                    .topicArn(topicArn)
-                    .build();
-
-            SubscribeResponse result = snsClient.subscribe(request);
-            return result.subscriptionArn() ;
-
-        } catch (SnsException e) {
-            System.err.println(e.awsErrorDetails().errorMessage());
-            System.exit(1);
-        }
-        return "";
-      }
-
-     public String getAllSubscriptions() {
-        List subList = new ArrayList<String>() ;
-
-        try {
-            SnsClient snsClient =  getSnsClient();
-            ListSubscriptionsByTopicRequest request = ListSubscriptionsByTopicRequest.builder()
-                    .topicArn(topicArn)
-                    .build();
-
-            ListSubscriptionsByTopicResponse result = snsClient.listSubscriptionsByTopic(request);
-            List<Subscription> allSubs  = result.subscriptions();
-
-            for (Subscription sub: allSubs) {
-                subList.add(sub.endpoint());
-            }
-
-        } catch (SnsException e) {
-            System.err.println(e.awsErrorDetails().errorMessage());
-            System.exit(1);
-        }
-        return convertToString(toXml(subList));
-      }
-
-      // Convert the list to XML to pass back to the view.
-      private Document toXml(List<String> subsList) {
-
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.newDocument();
-
-            // Start building the XML.
-            Element root = doc.createElement("Subs");
-            doc.appendChild(root);
+            XmlNode subsNode = doc.CreateElement("Subs");
+            doc.AppendChild(subsNode);
 
             // Iterate through the collection.
-            for (String sub : subsList) {
+            foreach (String sub in subsList)
+            {
 
-                Element item = doc.createElement("Sub");
-                root.appendChild(item);
+                XmlNode subNode = doc.CreateElement("Sub");
+                subsNode.AppendChild(subNode);
 
-                // Set email
-                Element email = doc.createElement("email");
-                email.appendChild(doc.createTextNode(sub));
-                item.appendChild(email);
+                XmlNode email = doc.CreateElement("email");
+                email.AppendChild(doc.CreateTextNode(sub));
+                subNode.AppendChild(email);
             }
 
-             return doc;
- 
-          }catch(ParserConfigurationException e){
-            e.printStackTrace();
+           return doc.OuterXml; 
           }
-         return null;
-        }
-
-       private String convertToString(Document xml) {
-         try {
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            StreamResult result = new StreamResult(new StringWriter());
-            DOMSource source = new DOMSource(xml);
-            transformer.transform(source, result);
-            return result.getWriter().toString();
-
-        } catch(TransformerException ex) {
-            ex.printStackTrace();
-        }
-        return null;
        }
      }
+
 ```
 
 **Note:** Make sure that you assign the SNS topic ARN to the **topicArn** data member. Otherwise, your code does not work. 
