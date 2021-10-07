@@ -42,7 +42,7 @@ Create an Amazon SNS queue that is used in the Java code. For information, see [
 
 To subscribe to an Amazon SNS topic, the user enters a valid email address into the web application. 
 
-![AWS Tracking Application](images/pic1.png)
+![AWS Tracking Application](images/client1.png)
 
 The specified email address recieves an email message that lets the recipient confirm the subscription. 
 
