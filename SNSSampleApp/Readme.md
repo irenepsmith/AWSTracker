@@ -212,21 +212,23 @@ The following C# code represents the **SnsService** class. This class uses the A
 
 ```csharp
      
-     using System;
-     using System.Threading;
-     using System.Collections.Generic;
-     using System.Threading.Tasks;
-     using Amazon.SimpleNotificationService;
-     using Amazon.SimpleNotificationService.Model;
-     using Amazon.Translate;
-     using System.Xml;
+    using System;
+    using System.Threading;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using Amazon.SimpleNotificationService;
+    using Amazon.SimpleNotificationService.Model;
+    using Amazon.Translate;
+    using Amazon.Translate.Model;
+    using System.Xml;
 
-     namespace MyMVCApplication.Controllers
-     {
-      public class SnsService
-      {
+    namespace MyMVCApplication.Controllers
+   {
+   
+    public class SnsService
+    {
 
-        private static String topicArn = "<ENTER YOUR TOPIC ARN>";
+        private static String topicArn = <ENTER YOUR TOPIC ARN>";
 
         public async Task<String> UnSubEmail(String email)
         {
@@ -240,7 +242,16 @@ The following C# code represents the **SnsService** class. This class uses the A
         public async Task<String> pubTopic(String body, String lang)
         {
             var client = new AmazonSimpleNotificationServiceClient();
-           var msgId = await PublishMessage(client, body);
+            var message = "";
+
+            if (lang.Equals("French"))
+                message = TranslateBody(body, "fr");
+            else if (lang.Equals("Spanish"))
+                message = TranslateBody(body, "es");
+            else
+                message = body; 
+
+            var msgId = await PublishMessage(client, message);
             return msgId;
         }
 
@@ -369,9 +380,22 @@ The following C# code represents the **SnsService** class. This class uses the A
             }
 
            return doc.OuterXml; 
-          }
+        }
+    
+        
+        private String TranslateBody(String msg, String lan)
+        {
+            var translateClient = new AmazonTranslateClient();
+            var request = new TranslateTextRequest();
+            request.SourceLanguageCode = "en" ;
+            request.TargetLanguageCode= lan;
+            request.Text = msg;
+            var response = translateClient.TranslateTextAsync(request);
+            return response.Result.TranslatedText; 
+        }
        }
      }
+
 
 ```
 
