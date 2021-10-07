@@ -116,95 +116,94 @@ Once you add these packages, you can use the AWS SDK for .NET in your project.
  
  ![AWS App](images/project3.png)
  
- Create these Java classes:
+ You work with these .NET classes:
 
-+ **SubApplication** - Used as the base class for the Spring Boot application.
-+ **SubController** - Used as the Spring Boot controller that handles HTTP requests. 
-+ **SnsService** - Used to invoke Amazon SNS operations by using the Amazon SNS Java API V2.  
++ **HomeController** - Used as the .NET controller that handles HTTP requests. 
++ **SnsService** - Used to invoke Amazon SNS operations by using the Amazon SNS .NET API This also uses the Amazon Translate API to translate messages. You need to create this class in the same location as the **HomeController**. 
 
-### SubApplication class
+### HomeController class
 
-The following Java code represents the **SubApplication** class.
+The following C# code represents the **HomeController** class. Becasue the Async version of the AWS SDK for .NET is used, notice that the controller methods have to use **async** keywords and the return values are defined using **Task**. 
 
-```java
-     package com.spring.sns;
+```csharp
+     using Microsoft.AspNetCore.Mvc;
+     using Microsoft.Extensions.Logging;
+     using MyMVCApplication.Models;
+     using System;
+     using System.Diagnostics;
+     using System.Threading.Tasks;
 
-     import org.springframework.boot.SpringApplication;
-     import org.springframework.boot.autoconfigure.SpringBootApplication;
+     namespace MyMVCApplication.Controllers
+    {
+    
+     public class HomeController : Controller
+     {
+        private readonly ILogger<HomeController> _logger;
 
-     @SpringBootApplication
-     public class SubApplication {
+        public HomeController(ILogger<HomeController> logger)
+        {
+            _logger = logger;
+        }
 
-     public static void main(String[] args) {
-        SpringApplication.run(SubApplication.class, args);
+        [HttpPost]
+        public async Task<ActionResult> PublishMessage(String body, String lang)
+        {
+            var snsService = new SnsService();
+            var bodyValue = body;
+            var langValue = lang;
+            var id = await snsService.pubTopic(body, lang);
+            return Content("Message " +id +" was successfully published");
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult> RemoveEmailSub(string email)
+        {
+
+            var snsService = new SnsService();
+            var emailValue = email;
+            var msg = await snsService.UnSubEmail(email);
+            return Content(msg);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> AddEmailSub(string email)
+        {
+
+            var snsService = new SnsService();
+            var emailValue = email;
+            var arn = await snsService.subEmail(email);
+            return Content(arn);
+        }
+
+
+        [HttpGet]
+        public async Task<ActionResult> GetAjaxValue() 
+        {
+
+            var snsService = new SnsService();
+            var xml = await snsService.getSubs();
+            return Content(xml);
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+      }
      }
-    }
-```
 
-### SubController class
-
-The following Java code represents the **SubController** class.
-
-```java
-     package com.spring.sns;
-
-     import org.springframework.beans.factory.annotation.Autowired;
-     import org.springframework.stereotype.Controller;
-     import org.springframework.web.bind.annotation.*;
-     import javax.servlet.http.HttpServletRequest;
-     import javax.servlet.http.HttpServletResponse;
-
-     @Controller
-     public class SubController {
-
-     @Autowired
-     SnsService sns;
-
-     @GetMapping("/")
-     public String root() {
-        return "index";
-     }
-
-
-     @GetMapping("/subscribe")
-     public String add() {
-        return "sub";
-     }
-
-     @RequestMapping(value = "/addEmail", method = RequestMethod.POST)
-     @ResponseBody
-     String addItems(HttpServletRequest request, HttpServletResponse response) {
-
-        String email = request.getParameter("email");
-        return sns.subEmail(email);
-     }
-
-     @RequestMapping(value = "/delSub", method = RequestMethod.POST)
-     @ResponseBody
-     String delSub(HttpServletRequest request, HttpServletResponse response) {
-
-        String email = request.getParameter("email");
-        sns.unSubEmail(email);
-        return email +" was successfully deleted!";
-     }
-
-     @RequestMapping(value = "/addMessage", method = RequestMethod.POST)
-     @ResponseBody
-     String addMessage(HttpServletRequest request, HttpServletResponse response) {
-
-        String body = request.getParameter("body");
-        String lang = request.getParameter("lang");
-        return sns.pubTopic(body,lang);
-     }
-
-     @RequestMapping(value = "/getSubs", method = RequestMethod.GET)
-     @ResponseBody
-     String getSubs(HttpServletRequest request, HttpServletResponse response) {
-
-        String mySub = sns.getAllSubscriptions();
-        return mySub;
-     }
-    }
 ```
 
 ### SnsService class
