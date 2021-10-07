@@ -65,23 +65,19 @@ This example application lets you view all of the subscribed email recipients by
 ![AWS Tracking Application](images/client4.png)
 
 
-## Create an IntelliJ project
+## Create a .NET Web App project
 
-Create an IntelliJ project that is used to create the web application.
+Create a Net Web App project using Visual Studio named **SNSApplication**.
 
-1. In the IntelliJ IDE, choose **File**, **New**, **Project**.
+![AWS Tracking Application](images/project2.png)
 
-2. In the New Project dialog box, choose **Maven**.
+1. In Visual Studio, choose **File**, **New**, **Project**.
+
+2. In the New Project dialog box, choose **ASP .NET Core Web App**.
 
 3. Choose **Next**.
 
-4. In **GroupId**, enter **spring-aws**.
-
-5. In **ArtifactId**, enter **SpringSubscribeApp**.
-
-6. Choose **Next**.
-
-7. Choose **Finish**.
+4. Choose **Create**.
 
 ## Add the POM dependencies to your project
 
