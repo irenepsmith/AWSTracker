@@ -62,7 +62,7 @@ This application lets a user specify the language of the message that is sent. F
 
 This example application lets you view all of the subscribed email recipients by choosing the **List Subscriptions** button, as shown in the following illustration.
 
-![AWS Tracking Application](images/pic4.png)
+![AWS Tracking Application](images/client4.png)
 
 
 ## Create an IntelliJ project
