@@ -11,12 +11,12 @@ You can create a web application that has subscription and publish functionality
 
 + Prerequisites
 + Understand the Publish/Subscription application
-+ Create an IntelliJ project 
-+ Add the POM dependencies to your project
-+ Create the Java classes
-+ Create the HTML files
-+ Package the application into a JAR file
-+ Deploy the application to Elastic Beanstalk
++ Create a .NET Web App project 
++ Add the required AWS Packages to your project
++ Create the .NET classes
++ Modify the cshtml file
++ Create the JS File
++ Run the application
 
 ## Prerequisites
 
