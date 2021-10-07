@@ -271,15 +271,13 @@ The following C# code represents the **SnsService** class. This class uses the A
             var val = DisplaySubscriptionList(subscriptions);
             return val;
         }
-
-        public static async Task<String> RemoveSub(IAmazonSimpleNotificationService client, String subArn)
+       
+        public static async void RemoveSub(IAmazonSimpleNotificationService client, String subArn)
         {
             var request = new UnsubscribeRequest();
             request.SubscriptionArn = subArn;
             var cancelToken = new CancellationToken();
-            await client.UnsubscribeAsync(request, cancelToken);
-
-            return "";//response.MessageId;
+           await client.UnsubscribeAsync(request, cancelToken);
         }
 
         public static async Task<String> GetSubArn(IAmazonSimpleNotificationService client, String email)
