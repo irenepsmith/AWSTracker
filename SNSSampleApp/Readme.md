@@ -46,11 +46,11 @@ To subscribe to an Amazon SNS topic, the user enters a valid email address into 
 
 The specified email address recieves an email message that lets the recipient confirm the subscription. 
 
-![AWS Tracking Application](images/pic2.png)
+![AWS Tracking Application](images/confirm.png)
 
 Once the email recipient accepts the confirmation, that email is subscribed to the specific SNS topic and recieves published messages. To publish a message, a user enters the message into the web applicaiton and then chooses the **Publish** button. 
 
-![AWS Tracking Application](images/pic3.png)
+![AWS Tracking Application](images/client2.png)
 
 This application lets a user specify the language of the message that is sent. For example, the user can select **French** from the dropdown field and then the message appears in that language to all subscribed users. 
 
