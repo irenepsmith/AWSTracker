@@ -350,8 +350,7 @@ The following C# code represents the **SnsService** class. This class uses the A
             foreach (var subscription in subscriptionList)
             {
                 emailList.Add(subscription.Endpoint);
-                email = subscription.Endpoint;
-             }
+            }
 
             var xml = GenerateXML(emailList);
             return xml; 
