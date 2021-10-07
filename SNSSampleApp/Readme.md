@@ -114,7 +114,7 @@ Once you add these packages, you can use the AWS SDK for .NET in your project.
  
  By default, most of the .NET classes that you use to build this AWS application are created. Notice the project structure of your application. 
  
- ![AWS Lex](images/project3.png)
+ ![AWS App](images/project3.png)
  
  Create these Java classes:
 
