@@ -220,15 +220,15 @@ The following C# code represents the **SnsService** class. This class uses the A
     using Amazon.Translate;
     using Amazon.Translate.Model;
     using System.Xml;
-    using Amazon;
+    using Amazon; 
+
 
     namespace MyMVCApplication.Controllers
-   {
-   
+    {
     public class SnsService
     {
 
-        private static String topicArn = <ENTER YOUR TOPIC ARN>";
+        private static String topicArn = "arn:aws:sns:us-east-1:814548047983:scottemail";
 
         public async Task<String> UnSubEmail(String email)
         {
@@ -271,13 +271,15 @@ The following C# code represents the **SnsService** class. This class uses the A
             var val = DisplaySubscriptionList(subscriptions);
             return val;
         }
-       
-        public static async void RemoveSub(IAmazonSimpleNotificationService client, String subArn)
+
+        public static async Task<String> RemoveSub(IAmazonSimpleNotificationService client, String subArn)
         {
             var request = new UnsubscribeRequest();
             request.SubscriptionArn = subArn;
             var cancelToken = new CancellationToken();
-           await client.UnsubscribeAsync(request, cancelToken);
+            await client.UnsubscribeAsync(request, cancelToken);
+
+            return "";
         }
 
         public static async Task<String> GetSubArn(IAmazonSimpleNotificationService client, String email)
@@ -348,7 +350,8 @@ The following C# code represents the **SnsService** class. This class uses the A
             foreach (var subscription in subscriptionList)
             {
                 emailList.Add(subscription.Endpoint);
-            }
+                email = subscription.Endpoint;
+             }
 
             var xml = GenerateXML(emailList);
             return xml; 
@@ -389,10 +392,9 @@ The following C# code represents the **SnsService** class. This class uses the A
             request.Text = msg;
             var response = translateClient.TranslateTextAsync(request);
             return response.Result.TranslatedText; 
-        }
+         }
        }
      }
-
 
 ```
 
