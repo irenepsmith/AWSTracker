@@ -230,7 +230,7 @@ The following C# code represents the **SnsService** class. This class uses the A
     public class SnsService
     {
 
-        private static String topicArn = "arn:aws:sns:us-east-1:814548047983:scottemail";
+        private static String topicArn = "<ENTER YOUR TOPIC ARN";
 
         public async Task<String> UnSubEmail(String email)
         {
