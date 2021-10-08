@@ -120,6 +120,8 @@ Once you add these packages, you can use the AWS SDK for .NET in your project.
 + **HomeController** - Used as the .NET controller that handles HTTP requests. 
 + **SnsService** - Used to invoke Amazon SNS operations by using the Amazon SNS .NET API This also uses the Amazon Translate API to translate messages. You need to create this class in the same location as the **HomeController**. 
 
+**Note**: You need to add the **SnsService** class to your project. 
+
 ### HomeController class
 
 The following C# code represents the **HomeController** class. Becasue the Async version of the AWS SDK for .NET is used, notice that the controller methods have to use **async** keywords and the return values are defined using **Task**. 
