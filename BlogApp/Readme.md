@@ -1,4 +1,4 @@
-# Creating a Job Posting application using the Asynchronous client for Amazon Redshift and Amazon Translate Services
+# Creating a Job Posting application using the Asynchronous Java client for Amazon Redshift and Amazon Translate Services
 
 ## Purpose
 You can create a dynamic web application that stores and queries data by using the Amazon Redshift service and the Amazon Redshift Java API V2. To interact with an Amazon Redshift table, you can use a [software.amazon.awssdk.services.redshiftdata.RedshiftDataAsyncClient](https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/redshiftdata/RedshiftDataAsyncClient.html). The application created in this AWS tutorial is a job posting web application that lets an employer, an administrator, or human resources staff alert employees or the public about a job opening within a company.
