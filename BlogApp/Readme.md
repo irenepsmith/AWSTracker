@@ -376,7 +376,7 @@ The following Java code represents the **Post** class.
 
 ### RedshiftService class
 
-The following Java code represents the **RedshiftService** class. This class uses the **RedshiftDataAsyncClient** to interact with data located the **blog** table.  For example, the **getPosts** method returns a result set that is queried from the **blog** table and displayed in the view. Likewise, the **addRecord** method adds a new record to the **blog** table. This class also uses the **TranslateAsyncClient** to translate the result set if requested by the user.
+The following Java code represents the **RedshiftService** class. This class uses the **RedshiftDataAsyncClient** to interact with data located in the **blog** table. For example, the **getPosts** method returns a result set that is queried from the **blog** table and displayed in the view. Likewise, the **addRecord** method adds a new record to the **blog** table. This class also uses the **TranslateAsyncClient** to translate the result set if requested by the user.
 
 When working with the **RedshiftDataAsyncClient**, you use a **CompletableFuture** object that allows you to access the response when it’s ready. You can access the **resp** object by calling the **futureGet.whenComplete** method. Then you can get service data by invoking the applicable method that belongs to the **resp** object. For example, you can get queried data by invoking the **resp.records** method. 
 
