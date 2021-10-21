@@ -218,7 +218,7 @@ At this point, you have a new project named **Blog**. Ensure that the pom.xml fi
 + **BlogApp** - Used as the base class for the Spring Boot application.
 + **BlogController** - Used as the Spring Boot controller that handles HTTP requests. 
 + **Post** - Used as the applications model that stores application data.
-+ **RedshiftService** - Used as the Spring Service that uses the Amazon Redshift Java API V2 and Amazon Translate Java API V2. 
++ **RedshiftService** - Used as the Spring Service that uses the Amazon Redshift and Amazon Translate Java Async clients. 
 + **WebSecurityConfig** - The role of this class is to set up an in-memory user store that contains a single user (the user name is **user** and the password is **password**).
 
 ### BlogApp class
@@ -376,18 +376,23 @@ The following Java code represents the **Post** class.
 
 ### RedshiftService class
 
-The following Java code represents the **RedshiftService** class. This class uses the Amazon Redshift Java API (V2) to interact with data located the **blog** table.  For example, the **getPosts** method returns a result set that is queried from the **blog** table and displayed in the view. Likewise, the **addRecord** method adds a new record to the **blog** table. This class also uses the Amazon Translate Java V2 API to translate the result set if requested by the user. 
+The following Java code represents the **RedshiftService** class. This class uses the **RedshiftDataAsyncClient** to interact with data located the **blog** table.  For example, the **getPosts** method returns a result set that is queried from the **blog** table and displayed in the view. Likewise, the **addRecord** method adds a new record to the **blog** table. This class also uses the **TranslateAsyncClient** to translate the result set if requested by the user.
+
+When working with the **RedshiftDataAsyncClient**, you use a **CompletableFuture** object that allows you to access the response when it’s ready. You can access the **resp** object by calling the **futureGet.whenComplete** method. Then you can get service data by invoking the applicable method that belongs to the **resp** object. For example, you can get queried data by invoking the **resp.records** method. 
+
+To return data that you read from the **resp** object (for example, queried data), you must use an **AtomicReference** object. You cannot return data from within the **futureGet.whenComplete** method. If you attempt to perform this task, you get a compile error. You can set the data by using the **AtomicReference** object's **set** method. You can then access the **AtomicReference** object from outside the **futureGet.whenComplete** method to get the data by using the **AtomicReference** object's **get** method. Then you can return the data from a Java method, as shown in the following Java code example.
 
 ```java
      package com.aws.blog;
 
      import org.springframework.stereotype.Component;
+     import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
      import software.amazon.awssdk.regions.Region;
      import software.amazon.awssdk.services.redshiftdata.model.*;
-     import software.amazon.awssdk.services.redshiftdata.RedshiftDataClient;
+     import software.amazon.awssdk.services.redshiftdata.RedshiftDataAsyncClient;
      import org.w3c.dom.Document;
      import org.w3c.dom.Element;
-     import software.amazon.awssdk.services.translate.TranslateClient;
+     import software.amazon.awssdk.services.translate.TranslateAsyncClient;
      import software.amazon.awssdk.services.translate.model.TranslateException;
      import software.amazon.awssdk.services.translate.model.TranslateTextRequest;
      import software.amazon.awssdk.services.translate.model.TranslateTextResponse;
@@ -404,35 +409,39 @@ The following Java code represents the **RedshiftService** class. This class use
      import java.text.SimpleDateFormat;
      import java.time.LocalDateTime;
      import java.time.format.DateTimeFormatter;
-     import java.util.ArrayList;  
+     import java.util.ArrayList;
      import java.util.Date;
      import java.util.List;
      import java.util.UUID;
+     import java.util.concurrent.CompletableFuture;
+     import java.util.concurrent.atomic.AtomicReference;
 
     @Component
     public class RedshiftService {
 
-    String clusterId = "<Enter your Cluster ID>";
-    String database = "<Enter your database name>";
-    String dbUser = "<Enter your dbUser value>";
+    String clusterId = "redshift-cluster-1";
+    String database = "dev";
+    String dbUser = "awsuser";
 
-    private RedshiftDataClient getClient() {
+    private RedshiftDataAsyncClient getClient() {
 
         Region region = Region.US_WEST_2;
-        RedshiftDataClient redshiftDataClient = RedshiftDataClient.builder()
+        RedshiftDataAsyncClient redshiftDatAsyncClient = RedshiftDataAsyncClient.builder()
                 .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                 .region(region)
                 .build();
 
-        return redshiftDataClient;
+        return redshiftDatAsyncClient;
     }
 
-    // Returns a collection from the Redshift table.
+
+    // Returns a collection that returns the latest five posts from the Redshift table.
     public String getPosts(String lang, int num) {
 
+        final AtomicReference<String> reference = new AtomicReference<>();
         try {
 
-            RedshiftDataClient redshiftDataClient = getClient();
+            RedshiftDataAsyncClient redshiftDataAsyncClient = getClient();
             String sqlStatement="";
             if (num ==5)
                 sqlStatement = "SELECT TOP 5 * FROM blog ORDER BY date DESC";
@@ -448,10 +457,16 @@ The following Java code represents the **RedshiftService** class. This class use
                     .sql(sqlStatement)
                     .build();
 
-            ExecuteStatementResponse response = redshiftDataClient.executeStatement(statementRequest);
-            String myId = response.id();
-            checkStatement(redshiftDataClient,myId );
-            List<Post> posts = getResults(redshiftDataClient, myId, lang);
+            CompletableFuture<ExecuteStatementResponse> futureGet  = redshiftDataAsyncClient.executeStatement(statementRequest);
+            futureGet.whenComplete((resp, err) -> {
+
+                reference.set(resp.id());
+
+              });
+            futureGet.join();
+
+            checkStatement(redshiftDataAsyncClient,reference.get() );
+            List<Post> posts = getResults(redshiftDataAsyncClient, reference.get(), lang);
             return convertToString(toXml(posts));
 
         } catch (RedshiftDataException e) {
@@ -459,14 +474,14 @@ The following Java code represents the **RedshiftService** class. This class use
             System.exit(1);
         }
         return "";
-    }
+     }
 
     // Add a new record to the Amazon Redshift table.
     public String addRecord(String author, String title, String body) {
 
         try {
 
-            RedshiftDataClient redshiftDataClient = getClient();
+            RedshiftDataAsyncClient redshiftDataClient = getClient();
             UUID uuid = UUID.randomUUID();
             String id = uuid.toString();
 
@@ -476,7 +491,6 @@ The following Java code represents the **RedshiftService** class. This class use
             String sDate1 = dtf.format(now);
             Date date1 = new SimpleDateFormat("yyyy/MM/dd").parse(sDate1);
             java.sql.Date sqlDate = new java.sql.Date( date1.getTime());
-
 
             // Inject an item into the system.
             String sqlStatement = "INSERT INTO blog (idblog, date, title, body, author) VALUES( '"+uuid+"' ,'"+sqlDate +"','"+title +"' , '"+body +"', '"+author +"');";
@@ -497,24 +511,30 @@ The following Java code represents the **RedshiftService** class. This class use
         return null;
     }
 
-    public void checkStatement(RedshiftDataClient redshiftDataClient,String sqlId ) {
+    public void checkStatement(RedshiftDataAsyncClient redshiftDataClient,String sqlId ) {
 
         try {
-
+            final AtomicReference<String> reference = new AtomicReference<>();
             DescribeStatementRequest statementRequest = DescribeStatementRequest.builder()
                     .id(sqlId)
                     .build() ;
 
             // Wait until the sql statement processing is finished.
             boolean finished = false;
-            String status = "";
+
             while (!finished) {
 
-                DescribeStatementResponse response = redshiftDataClient.describeStatement(statementRequest);
-                status = response.statusAsString();
-                System.out.println("..."+status);
+                CompletableFuture<DescribeStatementResponse> futureGet = redshiftDataClient.describeStatement(statementRequest);
+                futureGet.whenComplete((resp, err) -> {
 
-                if (status.compareTo("FINISHED") == 0) {
+                    String status = resp.statusAsString();
+                    reference.set(status);
+
+                });
+                futureGet.join();
+
+                System.out.println(reference.get());
+                if (reference.get().compareTo("FINISHED") == 0) {
                     break;
                 }
                 Thread.sleep(500);
@@ -528,20 +548,25 @@ The following Java code represents the **RedshiftService** class. This class use
         }
     }
 
-    public List<Post> getResults(RedshiftDataClient redshiftDataClient, String statementId, String lang) {
+
+    public List<Post> getResults(RedshiftDataAsyncClient redshiftDataClient, String statementId, String lang) {
 
         try {
-
+            final AtomicReference< List<List<Field>>> reference = new AtomicReference<>();
             List<Post>records = new ArrayList<>();
             GetStatementResultRequest resultRequest = GetStatementResultRequest.builder()
                     .id(statementId)
                     .build();
 
-            GetStatementResultResponse response = redshiftDataClient.getStatementResult(resultRequest);
+            CompletableFuture<GetStatementResultResponse> futureGet  = redshiftDataClient.getStatementResult(resultRequest);
+            futureGet.whenComplete((resp, err) -> {
+
+                reference.set(resp.records());
+            });
+            futureGet.join();
 
             // Iterate through the List element where each element is a List object.
-            List<List<Field>> dataList = response.records();
-
+            List<List<Field>> dataList = reference.get();
             Post post ;
             int index = 0 ;
             // Print out the records.
@@ -571,7 +596,7 @@ The following Java code represents the **RedshiftService** class. This class use
 
                     else if (index == 3) {
                         if (!lang.equals("English"))
-                             value = translateText(value, lang);
+                            value = translateText(value, lang);
 
                         post.setBody(value);
                     }
@@ -581,7 +606,7 @@ The following Java code represents the **RedshiftService** class. This class use
 
                     // Increment the index.
                     index ++;
-               }
+                }
 
                 // Push the Post object to the List.
                 records.add(post);
@@ -664,9 +689,9 @@ The following Java code represents the **RedshiftService** class. This class use
     }
 
     private String translateText(String text, String lang) {
-
+        final AtomicReference<String> reference = new AtomicReference<>();
         Region region = Region.US_WEST_2;
-        TranslateClient translateClient = TranslateClient.builder()
+        TranslateAsyncClient translateClient = TranslateAsyncClient.builder()
                 .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                 .region(region)
                 .build();
@@ -681,8 +706,14 @@ The following Java code represents the **RedshiftService** class. This class use
                         .text(text)
                         .build();
 
-                TranslateTextResponse textResponse = translateClient.translateText(textRequest);
-                transValue = textResponse.translatedText();
+                CompletableFuture<TranslateTextResponse> futureGet = translateClient.translateText(textRequest);
+                futureGet.whenComplete((resp, err) -> {
+
+                    reference.set(resp.translatedText());
+                });
+                futureGet.join();
+
+                transValue = reference.get() ;
 
             } else if (lang.compareTo("Russian")==0) {
 
@@ -692,8 +723,14 @@ The following Java code represents the **RedshiftService** class. This class use
                         .text(text)
                         .build();
 
-                TranslateTextResponse textResponse = translateClient.translateText(textRequest);
-                transValue = textResponse.translatedText();
+                CompletableFuture<TranslateTextResponse> futureGet = translateClient.translateText(textRequest);
+                futureGet.whenComplete((resp, err) -> {
+
+                    reference.set(resp.translatedText());
+                });
+                futureGet.join();
+
+                transValue = reference.get() ;
 
 
             } else if (lang.compareTo("Japanese")==0) {
@@ -704,8 +741,14 @@ The following Java code represents the **RedshiftService** class. This class use
                         .text(text)
                         .build();
 
-                TranslateTextResponse textResponse = translateClient.translateText(textRequest);
-                transValue = textResponse.translatedText();
+                CompletableFuture<TranslateTextResponse> futureGet = translateClient.translateText(textRequest);
+                futureGet.whenComplete((resp, err) -> {
+
+                    reference.set(resp.translatedText());
+                });
+                futureGet.join();
+
+                transValue = reference.get() ;
 
 
             } else if (lang.compareTo("Spanish")==0) {
@@ -716,8 +759,14 @@ The following Java code represents the **RedshiftService** class. This class use
                         .text(text)
                         .build();
 
-                TranslateTextResponse textResponse = translateClient.translateText(textRequest);
-                transValue = textResponse.translatedText();
+                CompletableFuture<TranslateTextResponse> futureGet = translateClient.translateText(textRequest);
+                futureGet.whenComplete((resp, err) -> {
+
+                    reference.set(resp.translatedText());
+                });
+                futureGet.join();
+
+                transValue = reference.get() ;
 
             } else {
 
@@ -726,9 +775,14 @@ The following Java code represents the **RedshiftService** class. This class use
                         .targetLanguageCode("zh")
                         .text(text)
                         .build();
+                CompletableFuture<TranslateTextResponse> futureGet = translateClient.translateText(textRequest);
+                futureGet.whenComplete((resp, err) -> {
 
-                TranslateTextResponse textResponse = translateClient.translateText(textRequest);
-                transValue = textResponse.translatedText();
+                    reference.set(resp.translatedText());
+                });
+                futureGet.join();
+
+                transValue = reference.get() ;
             }
 
         return transValue;
@@ -737,10 +791,10 @@ The following Java code represents the **RedshiftService** class. This class use
             System.err.println(e.getMessage());
             System.exit(1);
         }
-
         return "";
-       }
       }
+     }
+
 ```
 
 **Note**: Be sure to assign applicable values to the **clusterId**, **database**, and **dbUser** variables. Otherwise, your code does not work.
