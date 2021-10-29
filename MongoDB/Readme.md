@@ -107,7 +107,7 @@ The following figure shows the **work** table.
 1. In the IntelliJ IDE, choose **File**, **New**, **Project**.
 2. In the **New Project** dialog box, choose **Maven**, and then choose **Next**.
 3. For **GroupId**, enter **aws-spring**.
-4. For **ArtifactId**, enter **AWSItemTracker**.
+4. For **ArtifactId**, enter **ItemTrackerRDS**.
 6. Choose **Next**.
 7. Choose **Finish**.
 
